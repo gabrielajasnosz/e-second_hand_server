@@ -1,7 +1,20 @@
-package com.esecondhand.esecondhand.dto;
+package com.esecondhand.esecondhand.domain;
 
-public class UserDto {
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "user")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @Column
     private String username;
+    @Column
+    @JsonIgnore
     private String password;
 
     public String getUsername() {
@@ -19,4 +32,5 @@ public class UserDto {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }
