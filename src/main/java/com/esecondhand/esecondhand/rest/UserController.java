@@ -1,11 +1,18 @@
 package com.esecondhand.esecondhand.rest;
 
 
+import com.esecondhand.esecondhand.domain.User;
+import com.esecondhand.esecondhand.dto.RegisterFieldValidation;
 import com.esecondhand.esecondhand.dto.JwtResponse;
+import com.esecondhand.esecondhand.dto.RegisterDto;
 import com.esecondhand.esecondhand.dto.UserDto;
+import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
 import com.esecondhand.esecondhand.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,11 +33,26 @@ public class UserController {
         final String token = userService.signIn(userDto);
 
         return ResponseEntity.ok(new JwtResponse(token));
+
     }
 
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 409, message = "Conflict")
+    })
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> signUp(@RequestBody UserDto user) throws Exception {
-        return ResponseEntity.ok(userService.save(user));
+    public ResponseEntity<?> signUp(@RequestBody RegisterDto registerDto) {
+
+        try {
+            userService.save(registerDto);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+
+        } catch (EmailAlreadyExistsException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
     }
 
 
