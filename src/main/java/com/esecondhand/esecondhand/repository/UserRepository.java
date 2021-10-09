@@ -9,9 +9,11 @@ import org.springframework.stereotype.Repository;
 
 @Component
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer>, CrudRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Integer> {
     User findByDisplayName(String displayName);
     User findByEmail(String email);
 
     Boolean existsByEmail(String email);
 }
+
+

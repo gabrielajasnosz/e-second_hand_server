@@ -17,7 +17,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -54,6 +56,8 @@ public class UserService implements UserDetailsService {
         if(userDao.existsByEmail(userDto.getEmail())){
             throw new EmailAlreadyExistsException("Provided email already exists!");
         }
+        Date date = new Date();
+        userDto.setCreationDate(date);
         User user = userMapper.mapRegisterUserDtoToUser(userDto);
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
         return userDao.save(user);

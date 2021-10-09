@@ -1,0 +1,275 @@
+CREATE TABLE public.user(
+	id SERIAL NOT NULL,
+	display_name VARCHAR NOT NULL,
+	email VARCHAR UNIQUE NOT NULL,
+	password VARCHAR NOT NULL,
+	phone_number VARCHAR,
+	city VARCHAR,
+	zip_code VARCHAR,
+	PRIMARY KEY (id)
+)
+
+CREATE TABLE public.main_categories(
+	id SERIAL NOT NULL,
+	type product_type NOT NULL,
+	destinated_sex sex NOT NULL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY (id)
+)
+
+CREATE TYPE product_type AS ENUM ('clothes', 'shoes', 'accessories');
+
+CREATE TYPE sex AS ENUM ('female', 'male', 'unisex');
+
+INSERT INTO public.main_categories(type,destinated_sex,name) values('clothes','unisex','tops and t-shirts');
+pants, sweaters and sweatshirts
+
+
+INSERT INTO public.main_categories(type,destinated_sex,name) values('clothes','unisex','coats and jackets');
+INSERT INTO public.main_categories(type,destinated_sex,name) values('clothes','unisex','jeans');
+
+
+CREATE TYPE product_type AS ENUM ('clothes', 'shoes', 'accessories');
+
+CREATE TYPE sex AS ENUM ('female', 'male', 'unisex');
+
+select * from public.main_categories
+
+delete from main_categories where id=8
+
+
+CONSTRAINT fk_customer
+      FOREIGN KEY(customer_id)
+	  REFERENCES customers(customer_id)
+
+
+
+
+
+	  CREATE TABLE public.subcategories(
+      	id SERIAL NOT NULL,
+      	main_category_id INTEGER NOT NULL,
+      	destinated_sex sex NOT NULL,
+      	name VARCHAR NOT NULL,
+      	PRIMARY KEY (id),
+      	CONSTRAINT fk_main_category
+            FOREIGN KEY(main_category_id)
+      	  REFERENCES main_categories(id)
+      )
+
+
+
+      CREATE TABLE public.brand(
+      	id SERIAL NOT NULL,
+      	name VARCHAR NOT NULL
+      )
+
+CREATE TABLE public.shoes_size(
+	id SERIAL NOT NULL,
+	label VARCHAR NOT NULL
+)
+
+
+
+
+
+select * from main_categories
+
+INSERT INTO public.main_categories(type,destinated_sex,name) values('shoes','unisex','others');
+
+
+
+select * from
+
+
+delete from main_categories where id=22
+
+DROP TABLE SUBCATEGORIES
+CREATE TABLE public.subcategories(
+	id SERIAL NOT NULL,
+	main_category_id INTEGER NOT NULL,
+	destinated_sex sex NOT NULL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY (id),
+	CONSTRAINT fk_main_category
+      FOREIGN KEY(main_category_id)
+	  REFERENCES main_categories(id)
+)
+
+DROP TABLE public.brand
+CREATE TABLE public.brand(
+	id SERIAL NOT NULL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY(id)
+)
+
+
+DROP TABLE public.color
+CREATE TABLE public.color(
+	id SERIAL NOT NULL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY(id)
+)
+
+CREATE TABLE public.shoes_size(
+	id SERIAL NOT NULL,
+	label VARCHAR NOT NULL
+)
+DROP TABLE size
+CREATE TABLE public.size(
+	id SERIAL NOT NULL,
+	type product_type NOT NULL,
+	label VARCHAR NOT NULL,
+	PRIMARY KEY(id)
+)
+
+insert into brand (name) values ('H&M');
+
+
+DROP TABLE item
+CREATE TABLE public.item(
+	id SERIAL NOT NULL,
+	name VARCHAR NOT NULL,
+	user_id INTEGER NOT NULL,
+	description VARCHAR NOT NULL,
+	category_id INTEGER NOT NULL,
+	brand_id INTEGER NOT NULL,
+	color_id INTEGER NOT NULL,
+	price MONEY NOT NULL,
+	size_id INTEGER NOT NULL,
+	creation_date DATE NOT NULL,
+	destinated_sex sex NOT NULL,
+	PRIMARY KEY(id),
+	CONSTRAINT fk_category
+      FOREIGN KEY(category_id)
+	  REFERENCES subcategories(id),
+	CONSTRAINT fk_brand
+      FOREIGN KEY(brand_id)
+	  REFERENCES brand(id),
+	CONSTRAINT fk_color
+      FOREIGN KEY(color_id)
+	  REFERENCES color(id),
+	CONSTRAINT fk_size
+      FOREIGN KEY(size_id)
+	  REFERENCES size(id),
+	CONSTRAINT fk_user
+      FOREIGN KEY(user_id)
+	  REFERENCES public.user(id)
+)
+
+select * from public.user
+
+
+
+
+
+CREATE TABLE follower(
+	id serial NOT NULL,
+	follower_id INTEGER NOT NULL,
+	following_id INTEGER NOT NULL,
+	PRIMARY KEY(id),
+	CONSTRAINT fk_follower
+      FOREIGN KEY(follower_id)
+	  REFERENCES public.user(id),
+	CONSTRAINT fk_following
+      FOREIGN KEY(following_id)
+	  REFERENCES public.user(id)
+
+)
+
+CREATE TABLE saved_filters(
+	id serial NOT NULL,
+	user_id INTEGER NOT NULL,
+	category_id INTEGER,
+	brand_id INTEGER,
+	color_id INTEGER,
+	size_id INTEGER,
+	PRIMARY KEY(id),
+	CONSTRAINT fk_user_filters
+      FOREIGN KEY(user_id)
+	  REFERENCES public.user(id),
+	CONSTRAINT fk_category_filters
+      FOREIGN KEY(category_id)
+	  REFERENCES subcategories(id),
+	CONSTRAINT fk_brand_filters
+      FOREIGN KEY(brand_id)
+	  REFERENCES brand(id),
+	CONSTRAINT fk_color_filters
+      FOREIGN KEY(color_id)
+	  REFERENCES color(id),
+	CONSTRAINT fk_size_filters
+      FOREIGN KEY(size_id)
+	  REFERENCES size(id)
+
+
+)
+
+CREATE TABLE profile_pictures(
+	id SERIAL NOT NULL,
+	user_id INTEGER NOT NULL,
+	file_track VARCHAR NOT NULL,
+	LAST_CHANGE DATE NOT NULL	,
+	PRIMARY KEY (id),
+	CONSTRAINT fk_user_picture
+      FOREIGN KEY(user_id)
+	  REFERENCES public.user(id)
+)
+
+
+CREATE TABLE item_pictures(
+	id SERIAL NOT NULL,
+	user_id INTEGER NOT NULL,
+	item_id INTEGER NOT NULL,
+	creation_date DATE NOT NULL,
+	PRIMARY KEY (id),
+	CONSTRAINT fk_item_picture
+      FOREIGN KEY(item_id)
+	  REFERENCES item(id),
+	CONSTRAINT fk_item_picture_user
+      FOREIGN KEY(user_id)
+	  REFERENCES public.user(id)
+)
+
+
+CREATE TABLE public.main_categories(
+	id SERIAL NOT NULL,
+	type VARCHAR NOT NULL,
+	destination_sex VARCHAR NOT NULL,
+	name VARCHAR NOT NULL,
+	PRIMARY KEY (id)
+)
+
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (1, 'clothes', 'unisex', 'pants');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (2, 'clothes', 'unisex', 'sweaters and sweatshirts');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (3, 'clothes', 'unisex', 'tops and t-shirts');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (4, 'clothes', 'unisex', 'coats and jackets');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (5, 'clothes', 'unisex', 'jeans');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (6, 'clothes', 'female', 'dresses');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (7, 'clothes', 'female', 'skirts');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (9, 'clothes', 'unisex', 'sport clothes');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (10, 'clothes', 'unisex', 'shorts');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (11, 'clothes', 'unisex', 'jackets and suits');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (12, 'clothes', 'unisex', 'swimsuits');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (13, 'clothes', 'female', 'clothes for pregnant women');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (14, 'clothes', 'unisex', 'others');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (15, 'shoes', 'female', 'high heels');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (16, 'shoes', 'unisex', 'sandals');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (17, 'shoes', 'unisex', 'moccasins');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (18, 'shoes', 'unisex', 'trainers');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (19, 'shoes', 'female', 'flat-heeled shoes');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (20, 'shoes', 'unisex', 'slippers');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (21, 'shoes', 'unisex', 'winter boots');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (23, 'shoes', 'male', 'elegant shoes');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (24, 'accessories', 'female', 'bags');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (25, 'accessories', 'unisex', 'belts');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (26, 'accessories', 'unisex', 'sunglasses');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (27, 'accessories', 'unisex', 'caps and hats');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (28, 'accessories', 'unisex', 'scarfs');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (29, 'accessories', 'unisex', 'gloves');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (30, 'accessories', 'unisex', 'watches');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (31, 'accessories', 'unisex', 'others');
+INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (32, 'shoes', 'unisex', 'others');
+
+
+
+
