@@ -5,10 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private CategoryService categoryService;
@@ -18,13 +19,14 @@ public class CategoryController {
     }
 
 
-    @RequestMapping(value = "/womenCategories", method = RequestMethod.GET)
-    public ResponseEntity<List<MainCategoryDto>> getWomenCategories() throws Exception {
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Map<String,List<MainCategoryDto>>>> getCategories(){
 
-        List<MainCategoryDto> womenCategories = categoryService.getWomenCategories();
+        Map<String, Map<String,List<MainCategoryDto>>>  categories = categoryService.getCategories();
 
-        return ResponseEntity.ok(womenCategories);
+        return ResponseEntity.ok(categories);
 
     }
+
 
 }
