@@ -1,14 +1,11 @@
 package com.esecondhand.esecondhand.rest;
 
 
-import com.esecondhand.esecondhand.domain.User;
-import com.esecondhand.esecondhand.dto.RegisterFieldValidation;
 import com.esecondhand.esecondhand.dto.JwtResponse;
 import com.esecondhand.esecondhand.dto.RegisterDto;
 import com.esecondhand.esecondhand.dto.UserDto;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
 import com.esecondhand.esecondhand.service.UserService;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.context.annotation.Lazy;

@@ -272,4 +272,29 @@ INSERT INTO public.main_categories (id, type, destination_sex, name) VALUES (32,
 
 
 
+CREATE TABLE public.user(
+	id SERIAL NOT NULL,
+	display_name VARCHAR NOT NULL,
+	email VARCHAR UNIQUE NOT NULL,
+	password VARCHAR NOT NULL,
+	sex VARCHAR NOT NULL
+	phone_number VARCHAR,
+	city VARCHAR,
+	zip_code VARCHAR,
+	creation_date DATE,
+	PRIMARY KEY (id)
+)
 
+
+CREATE TABLE public.user(
+	id bigint UNIQUE NOT NULL generated always as identity,
+	display_name VARCHAR NOT NULL,
+	email VARCHAR UNIQUE NOT NULL,
+	password VARCHAR NOT NULL,
+	sex VARCHAR NOT NULL,
+	phone_number VARCHAR,
+	city VARCHAR,
+	zip_code VARCHAR,
+	creation_date DATE,
+	PRIMARY KEY (id)
+)

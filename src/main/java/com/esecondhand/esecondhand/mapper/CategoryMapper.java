@@ -24,7 +24,6 @@ public class CategoryMapper {
         return entity.stream().map(e -> {
             SubcategoryDto dto = new SubcategoryDto();
             dto.setId(e.getId());
-            dto.setDestinationSex(e.getDestinationSex());
             dto.setName(e.getName());
             dto.setMainCategoryId(e.getMainCategoryId());
             return dto;

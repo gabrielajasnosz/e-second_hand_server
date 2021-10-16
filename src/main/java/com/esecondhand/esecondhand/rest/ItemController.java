@@ -1,7 +1,9 @@
 package com.esecondhand.esecondhand.rest;
 
+import com.esecondhand.esecondhand.domain.ItemDto;
 import com.esecondhand.esecondhand.dto.MainCategoryDto;
 import com.esecondhand.esecondhand.service.CategoryService;
+import com.esecondhand.esecondhand.service.ItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,22 +15,19 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/categories")
-public class CategoryController {
+@RequestMapping("/item")
+public class ItemController {
 
-    private CategoryService categoryService;
+    private ItemService itemService;
 
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    public ItemController(ItemService itemService) {
+        this.itemService = itemService;
     }
 
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Map<String, List<MainCategoryDto>>>> getCategories() {
-
-        Map<String, Map<String, List<MainCategoryDto>>> categories = categoryService.getCategories();
-
-        return ResponseEntity.ok(categories);
+    @RequestMapping(value = "/add", method = RequestMethod.GET)
+    public ResponseEntity<?> addItem(ItemDto itemDto) {
+        return (ResponseEntity<?>) ResponseEntity.ok();
 
     }
 

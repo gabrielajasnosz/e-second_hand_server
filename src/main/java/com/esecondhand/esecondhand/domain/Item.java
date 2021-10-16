@@ -15,18 +15,18 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user")
-public class User {
+@Table(name = "item")
+public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String email;
-    private String displayName;
-    private String phoneNumber;
-    private String city;
-    private String zipCode;
+    private String name;
+    private int userId;
+    private String description;
+    private int categoryId;
+    private int brandId;
+    private int colorId;
+    private double price;
+    private int sizeId;
     private Date creationDate;
-    private String sex;
-    @JsonIgnore
-    private String password;
 }

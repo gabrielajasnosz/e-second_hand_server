@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -53,7 +52,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User save(RegisterDto userDto) throws EmailAlreadyExistsException {
-        if(userDao.existsByEmail(userDto.getEmail())){
+        if (userDao.existsByEmail(userDto.getEmail())) {
             throw new EmailAlreadyExistsException("Provided email already exists!");
         }
         Date date = new Date();

@@ -8,7 +8,8 @@ import com.esecondhand.esecondhand.repository.MainCategoryRepository;
 import com.esecondhand.esecondhand.repository.SubcategoryRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,11 +27,11 @@ public class CategoryService {
         this.categoryMapper = categoryMapper;
     }
 
-    private List<MainCategoryDto> getSubcategories(List<MainCategoryDto> list, String condition){
+    private List<MainCategoryDto> getSubcategories(List<MainCategoryDto> list, String condition) {
         return list.stream().filter(category -> category.getType().equals("condition")).collect(Collectors.toList());
     }
 
-    public Map<String, Map<String,List<MainCategoryDto>>> getCategories() {
+    public Map<String, Map<String, List<MainCategoryDto>>> getCategories() {
 
         List<MainCategory> mainCategories = mainCategoryRepository.findAll();
 
