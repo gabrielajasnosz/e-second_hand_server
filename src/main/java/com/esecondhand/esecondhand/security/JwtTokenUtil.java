@@ -1,5 +1,6 @@
 package com.esecondhand.esecondhand.security;
 
+import com.esecondhand.esecondhand.domain.AppUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -53,8 +54,9 @@ public class JwtTokenUtil implements Serializable {
         return false;
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(AppUser userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userDetails.getUser().getId());
         return doGenerateToken(claims, userDetails.getUsername());
     }
 

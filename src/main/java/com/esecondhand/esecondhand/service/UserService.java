@@ -1,5 +1,6 @@
 package com.esecondhand.esecondhand.service;
 
+import com.esecondhand.esecondhand.domain.AppUser;
 import com.esecondhand.esecondhand.domain.User;
 import com.esecondhand.esecondhand.dto.RegisterDto;
 import com.esecondhand.esecondhand.dto.UserDto;
@@ -47,8 +48,7 @@ public class UserService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
-                new ArrayList<>());
+        return new AppUser(user);
     }
 
     public User save(RegisterDto userDto) throws EmailAlreadyExistsException {
@@ -76,7 +76,7 @@ public class UserService implements UserDetailsService {
     public String signIn(UserDto userDto) throws Exception {
 
         authenticate(userDto.getEmail(), userDto.getPassword());
-        UserDetails userDetails = loadUserByUsername(userDto.getEmail());
+        AppUser userDetails = (AppUser) loadUserByUsername(userDto.getEmail());
         return jwtTokenUtil.generateToken(userDetails);
 
     }
