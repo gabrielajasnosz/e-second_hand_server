@@ -1,8 +1,7 @@
 package com.esecondhand.esecondhand.rest;
 
-import com.esecondhand.esecondhand.dto.BrandDto;
-import com.esecondhand.esecondhand.dto.MainCategoryDto;
-import com.esecondhand.esecondhand.dto.SizeDto;
+import com.esecondhand.esecondhand.domain.Category;
+import com.esecondhand.esecondhand.dto.*;
 import com.esecondhand.esecondhand.service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,11 +25,9 @@ public class CategoryController {
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, Map<String, List<MainCategoryDto>>>> getCategories() {
+    public ResponseEntity<List<CategoryDto>> getCategories() {
 
-        Map<String, Map<String, List<MainCategoryDto>>> categories = categoryService.getCategories();
-
-        return ResponseEntity.ok(categories);
+        return ResponseEntity.ok(categoryService.getCategories());
 
     }
 
@@ -51,6 +48,7 @@ public class CategoryController {
         return ResponseEntity.ok(sizes);
 
     }
+
 
 
 }

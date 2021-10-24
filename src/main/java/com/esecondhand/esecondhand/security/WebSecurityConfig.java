@@ -60,6 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/login",
                         "/register",
                         "/categories/**",
+                        "/colors/**",
                         "/v2/api-docs",
                         "/configuration/ui",
                         "/swagger-resources/**",

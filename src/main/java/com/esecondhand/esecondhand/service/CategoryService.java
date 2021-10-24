@@ -1,17 +1,16 @@
 package com.esecondhand.esecondhand.service;
 
 
+import com.esecondhand.esecondhand.domain.Category;
+import com.esecondhand.esecondhand.domain.Color;
+import com.esecondhand.esecondhand.domain.Gender;
 import com.esecondhand.esecondhand.domain.MainCategory;
-import com.esecondhand.esecondhand.dto.BrandDto;
-import com.esecondhand.esecondhand.dto.MainCategoryDto;
-import com.esecondhand.esecondhand.dto.SizeDto;
+import com.esecondhand.esecondhand.dto.*;
 import com.esecondhand.esecondhand.mapper.BrandMapper;
 import com.esecondhand.esecondhand.mapper.CategoryMapper;
+import com.esecondhand.esecondhand.mapper.ColorMapper;
 import com.esecondhand.esecondhand.mapper.SizeMapper;
-import com.esecondhand.esecondhand.repository.BrandRepository;
-import com.esecondhand.esecondhand.repository.MainCategoryRepository;
-import com.esecondhand.esecondhand.repository.SizeRepository;
-import com.esecondhand.esecondhand.repository.SubcategoryRepository;
+import com.esecondhand.esecondhand.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,7 +34,13 @@ public class CategoryService {
 
     private BrandMapper brandMapper;
 
-    public CategoryService(MainCategoryRepository mainCategoryRepository, SubcategoryRepository subcategoryRepository, CategoryMapper categoryMapper, BrandRepository brandRepository, SizeMapper sizeMapper, SizeRepository sizeRepository, BrandMapper brandMapper) {
+    private ColorMapper colorMapper;
+
+    private ColorRepository colorRepository;
+    private CategoryRepository categoryRepository;
+
+
+    public CategoryService(MainCategoryRepository mainCategoryRepository, SubcategoryRepository subcategoryRepository, CategoryMapper categoryMapper, BrandRepository brandRepository, SizeMapper sizeMapper, SizeRepository sizeRepository, BrandMapper brandMapper, ColorMapper colorMapper, ColorRepository colorRepository, CategoryRepository categoryRepository) {
         this.mainCategoryRepository = mainCategoryRepository;
         this.subcategoryRepository = subcategoryRepository;
         this.categoryMapper = categoryMapper;
@@ -43,20 +48,16 @@ public class CategoryService {
         this.sizeMapper = sizeMapper;
         this.sizeRepository = sizeRepository;
         this.brandMapper = brandMapper;
+        this.colorMapper = colorMapper;
+        this.colorRepository = colorRepository;
+        this.categoryRepository = categoryRepository;
     }
 
-    public Map<String, Map<String, List<MainCategoryDto>>> getCategories() {
+    public List<CategoryDto> getCategories() {
+        List <Category> categories = categoryRepository.findAllCategories();
+        List <CategoryDto> categoriesDto = categoryMapper.mapToCategoryDto(categories);
 
-        List<MainCategory> mainCategories = mainCategoryRepository.findAll();
-
-        List<MainCategoryDto> mainCategoryDtos = categoryMapper.mapToCategoryDto(mainCategories);
-
-        List<MainCategoryDto> categories = mainCategoryDtos.stream().map(dto -> {
-            dto.setSubcategories(categoryMapper.mapToSubcategoryDto(subcategoryRepository.findAllByMainCategoryId(dto.getId())));
-            return dto;
-        }).collect(Collectors.toList());
-
-        return categories.stream().collect(Collectors.groupingBy(MainCategoryDto::getType, Collectors.groupingBy(MainCategoryDto::getDestinationSex)));
+        return categoriesDto;
 
     }
 
@@ -70,6 +71,11 @@ public class CategoryService {
         List<SizeDto> sizes = sizeMapper.mapToSizeDtoList(sizeRepository.findAll());
 
         return sizes.stream().collect(Collectors.groupingBy(SizeDto::getProductType));
+
+    }
+    public List<ColorDto> getColors() {
+
+        return colorMapper.mapToColorDtoList(colorRepository.findAll());
 
     }
 }

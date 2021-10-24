@@ -298,3 +298,32 @@ CREATE TABLE public.user(
 	creation_date DATE,
 	PRIMARY KEY (id)
 )
+
+
+DROP TABLE category
+CREATE TABLE public.category(
+	id serial,
+	name varchar,
+	gender gender,
+	parent_id integer,
+	related_category_id integer,
+	PRIMARY KEY(id),
+	CONSTRAINT fk_category
+      FOREIGN KEY(parent_id)
+	  REFERENCES category(id),
+	CONSTRAINT fk_category_related
+      FOREIGN KEY(related_category_id)
+	  REFERENCES category(id)
+
+)
+
+insert into category (values)
+
+CREATE TYPE gender AS ENUM ('woman', 'man');
+
+select * from category
+
+insert into category(name,gender,parent_id,related_category_id) values ('clothes',null,null,null)
+
+insert into category(name,gender,parent_id,related_category_id) values ('pants','woman',1,null)
+
