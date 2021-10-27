@@ -19,10 +19,10 @@ import java.util.List;
 @NoArgsConstructor
 
 public class CategoryDto {
-    private int id;
+    private Long id;
     private String name;
     private Gender gender;
-    private Integer parentId;
+    private Long parentId;
     private List<CategoryDto> subCategories=new ArrayList<>();
 }
 

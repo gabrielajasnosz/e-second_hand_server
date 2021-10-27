@@ -19,14 +19,15 @@ import java.util.Date;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String email;
     private String displayName;
     private String phoneNumber;
     private String city;
     private String zipCode;
     private Date creationDate;
-    private String sex;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     @JsonIgnore
     private String password;
 }

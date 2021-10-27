@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BrandDto {
-    private int id;
+    private Long id;
     private String name;
 }

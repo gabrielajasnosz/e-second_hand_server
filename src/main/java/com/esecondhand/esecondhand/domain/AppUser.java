@@ -54,7 +54,7 @@ public class AppUser implements UserDetails {
         return user;
     }
 
-    public int getUserId(){
+    public Long getUserId(){
         return user.getId();
     }
 }

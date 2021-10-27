@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -19,14 +20,17 @@ import java.util.Date;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String name;
-    private int userId;
+    private Long userId;
     private String description;
-    private int categoryId;
-    private int brandId;
-    private int colorId;
-    private double price;
-    private int sizeId;
+    private Long categoryId;
+    private Long brandId;
+    private Long colorId;
+    private BigDecimal price;
+    private Long sizeId;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     private Date creationDate;
 }

@@ -1,11 +1,12 @@
 package com.esecondhand.esecondhand.dto;
 
-
+import com.esecondhand.esecondhand.domain.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -13,14 +14,14 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemDto {
-    private int id;
     private String name;
-    private int userId;
+    private Long userId;
     private String description;
-    private int categoryId;
-    private int brandId;
-    private int colorId;
-    private double price;
-    private int sizeId;
+    private Long categoryId;
+    private Long brandId;
+    private Long colorId;
+    private BigDecimal price;
+    private Long sizeId;
+    private Gender gender;
     private Date creationDate;
 }

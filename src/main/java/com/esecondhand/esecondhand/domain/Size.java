@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class Size {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String productType;
     private String name;
 }

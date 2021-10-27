@@ -1,5 +1,6 @@
 package com.esecondhand.esecondhand.mapper;
 
+import com.esecondhand.esecondhand.domain.Gender;
 import com.esecondhand.esecondhand.domain.User;
 import com.esecondhand.esecondhand.dto.RegisterDto;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ public class UserMapper {
         user.setPassword(userDto.getPassword());
         user.setDisplayName(userDto.getDisplayName());
         user.setEmail(userDto.getEmail());
-        user.setSex(userDto.getSex());
+        user.setGender(Gender.valueOf(userDto.getSex()));
         user.setCreationDate(userDto.getCreationDate());
 
         return user;

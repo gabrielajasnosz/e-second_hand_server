@@ -18,7 +18,7 @@ import java.util.List;
 @Entity
 public class Category {
     @Id
-    private int id;
+    private Long id;
     private String name;
     @Enumerated(EnumType.STRING)
     private Gender gender;

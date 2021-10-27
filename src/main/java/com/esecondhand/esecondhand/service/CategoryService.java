@@ -2,9 +2,6 @@ package com.esecondhand.esecondhand.service;
 
 
 import com.esecondhand.esecondhand.domain.Category;
-import com.esecondhand.esecondhand.domain.Color;
-import com.esecondhand.esecondhand.domain.Gender;
-import com.esecondhand.esecondhand.domain.MainCategory;
 import com.esecondhand.esecondhand.dto.*;
 import com.esecondhand.esecondhand.mapper.BrandMapper;
 import com.esecondhand.esecondhand.mapper.CategoryMapper;
@@ -20,13 +17,9 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryService {
 
-    private MainCategoryRepository mainCategoryRepository;
-
     private CategoryMapper categoryMapper;
 
     private SizeMapper sizeMapper;
-
-    private SubcategoryRepository subcategoryRepository;
 
     private BrandRepository brandRepository;
 
@@ -40,9 +33,7 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
 
-    public CategoryService(MainCategoryRepository mainCategoryRepository, SubcategoryRepository subcategoryRepository, CategoryMapper categoryMapper, BrandRepository brandRepository, SizeMapper sizeMapper, SizeRepository sizeRepository, BrandMapper brandMapper, ColorMapper colorMapper, ColorRepository colorRepository, CategoryRepository categoryRepository) {
-        this.mainCategoryRepository = mainCategoryRepository;
-        this.subcategoryRepository = subcategoryRepository;
+    public CategoryService( CategoryMapper categoryMapper, BrandRepository brandRepository, SizeMapper sizeMapper, SizeRepository sizeRepository, BrandMapper brandMapper, ColorMapper colorMapper, ColorRepository colorRepository, CategoryRepository categoryRepository) {
         this.categoryMapper = categoryMapper;
         this.brandRepository = brandRepository;
         this.sizeMapper = sizeMapper;
