@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @Getter
@@ -39,6 +39,9 @@ public class ItemEntryDto {
     @NotNull(message = "Gender cannot be null")
     private String sex;
 
+    private Long mainImageId;
+
     @NotNull(message = "You have to send at least one photo")
-    private MultipartFile image;
+    private MultipartFile[] files;
+
 }
