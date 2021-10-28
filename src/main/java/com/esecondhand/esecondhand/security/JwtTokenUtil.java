@@ -1,6 +1,6 @@
 package com.esecondhand.esecondhand.security;
 
-import com.esecondhand.esecondhand.domain.AppUser;
+import com.esecondhand.esecondhand.domain.entity.AppUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
