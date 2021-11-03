@@ -4,6 +4,8 @@ import com.esecondhand.esecondhand.domain.entity.AppUser;
 import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.dto.RegisterDto;
 import com.esecondhand.esecondhand.domain.dto.UserDto;
+import com.esecondhand.esecondhand.domain.entity.VerificationToken;
+import com.esecondhand.esecondhand.domain.repository.VerificationTokenRepository;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
 import com.esecondhand.esecondhand.domain.mapper.UserMapper;
 import com.esecondhand.esecondhand.domain.repository.UserRepository;
@@ -19,10 +21,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
+
+    private static final int EXPIRATION = 60 * 24;
 
     private final UserRepository userDao;
 
@@ -34,18 +40,22 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userDao, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper) {
+    private final VerificationTokenRepository verificationTokenRepository;
+
+
+    public UserServiceImpl(UserRepository userDao, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository) {
         this.userDao = userDao;
         this.authenticationManager = authenticationManager;
         this.bcryptEncoder = bcryptEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userMapper = userMapper;
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userDao.findByEmail(email);
-        if (user == null) {
+        if (user == null || !user.isEnabled()) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
         return new AppUser(user);
@@ -59,6 +69,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userDto.setCreationDate(date);
         User user = userMapper.mapRegisterUserDtoToUser(userDto);
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
+        user.setEnabled(false);
         return userDao.save(user);
     }
 
@@ -79,5 +90,31 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         AppUser userDetails = (AppUser) loadUserByUsername(userDto.getEmail());
         return jwtTokenUtil.generateToken(userDetails);
 
+    }
+
+    private Date calculateExpiryDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Timestamp(cal.getTime().getTime()));
+        cal.add(Calendar.MINUTE, EXPIRATION);
+        return new Date(cal.getTime().getTime());
+    }
+
+    @Override
+    public void createVerificationToken(User user, String token) {
+        VerificationToken myToken = new VerificationToken();
+        myToken.setToken(token);
+        myToken.setUser(user);
+        myToken.setExpiryDate(calculateExpiryDate());
+        verificationTokenRepository.save(myToken);
+    }
+
+    @Override
+    public void saveRegisteredUser(User user) {
+        userDao.save(user);
+    }
+
+    @Override
+    public VerificationToken getVerificationToken(String verificationToken) {
+        return verificationTokenRepository.findByToken(verificationToken);
     }
 }

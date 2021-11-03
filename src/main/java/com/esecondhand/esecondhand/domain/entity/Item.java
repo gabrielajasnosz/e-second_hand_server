@@ -9,7 +9,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,32 +27,31 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name="user_id", referencedColumnName = "id")
-    @JsonIgnore
     private User user;
     private String description;
 
     @ManyToOne
     @JoinColumn(name="category_id", referencedColumnName = "id")
-    @JsonIgnore
     private Category category;
 
     @ManyToOne
     @JoinColumn(name="brand_id", referencedColumnName = "id")
-    @JsonIgnore
     private Brand brand;
 
     @ManyToOne
     @JoinColumn(name="color_id", referencedColumnName = "id")
-    @JsonIgnore
     private Color color;
     private Double price;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name="size_id", referencedColumnName = "id")
     private Size size;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private Date creationDate;
+
+    @OneToMany
+    @JoinColumn(name="item_id", referencedColumnName = "id")
+    private List<ItemPicture> itemPictures=new ArrayList<>();
 }

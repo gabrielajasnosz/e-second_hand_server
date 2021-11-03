@@ -37,9 +37,8 @@ public class ItemEntryDto {
     @NotNull(message = "Gender cannot be null")
     private String sex;
 
-    private Long mainImageId;
+    private MultipartFile[] images;
 
-    @NotNull(message = "You have to send at least one photo")
-    private MultipartFile[] files;
+    private MultipartFile mainImage;
 
 }

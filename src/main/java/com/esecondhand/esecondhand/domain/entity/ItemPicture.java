@@ -26,5 +26,6 @@ public class ItemPicture {
     private Item item;
     private Date creationDate;
     private String fileUrl;
+    private boolean isMainPicture;
 
 }

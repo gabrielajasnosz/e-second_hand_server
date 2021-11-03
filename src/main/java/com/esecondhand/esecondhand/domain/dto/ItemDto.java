@@ -8,20 +8,28 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemDto {
-    private String name;
+    private Long id;
     private Long userId;
+    private String userDisplayName;
     private String description;
-    private CategoryDto categoryDto;
-    private Long brandId;
-    private Long colorId;
-    private BigDecimal price;
-    private Long sizeId;
+    private String category;
+    private Long categoryId;
+    private Gender categoryGender;
+    private String brand;
+    private String color;
+    private Double price;
+    private String size;
     private Gender gender;
     private Date creationDate;
+    private List<ItemPictureDto> itemPictures;
+
+
+
 }

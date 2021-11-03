@@ -22,10 +22,5 @@ public class SpringConfiguration extends WebMvcConfigurerAdapter {
                 .paths(PathSelectors.any())
                 .build();
     }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**").addResourceLocations("file:/path/to/my/dropbox/");
-    }
 }
 

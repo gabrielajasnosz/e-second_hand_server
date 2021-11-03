@@ -29,4 +29,5 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String password;
+    private boolean enabled;
 }
