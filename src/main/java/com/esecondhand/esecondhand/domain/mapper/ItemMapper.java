@@ -54,6 +54,8 @@ public class ItemMapper {
         itemDto.setName(item.getName());
         itemDto.setGender(item.getGender());
         itemDto.setCreationDate(item.getCreationDate());
+        itemDto.setIsActive(item.getIsActive());
+        itemDto.setIsHidden(item.getIsHidden());
         itemDto.setItemPictures(itemPictureMapper.mapToItemPictureDtoList(item.getItemPictures()));
 
 

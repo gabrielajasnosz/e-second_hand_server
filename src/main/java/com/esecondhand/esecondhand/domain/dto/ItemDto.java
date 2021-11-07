@@ -33,5 +33,7 @@ public class ItemDto {
     private Long productType;
     private Gender gender;
     private Date creationDate;
+    private Boolean isHidden;
+    private Boolean isActive;
     private List<ItemPictureDto> itemPictures;
 }

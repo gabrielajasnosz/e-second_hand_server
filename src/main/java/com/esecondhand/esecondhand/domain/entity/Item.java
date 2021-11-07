@@ -51,6 +51,9 @@ public class Item {
     private Gender gender;
     private Date creationDate;
 
+    private Boolean isActive;
+    private Boolean isHidden;
+
     @OneToMany
     @JoinColumn(name="item_id", referencedColumnName = "id")
     private List<ItemPicture> itemPictures=new ArrayList<>();

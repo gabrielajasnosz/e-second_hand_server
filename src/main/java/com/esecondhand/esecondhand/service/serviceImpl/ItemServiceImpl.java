@@ -6,7 +6,8 @@ import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
 import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
-import com.esecondhand.esecondhand.exception.ItemDontExistsException;
+import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
+import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.FileSystemResource;
@@ -97,22 +98,35 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
-    public ItemDto getItem(Long itemId) throws ItemDontExistsException {
+    @Override
+    public ItemDto getItem(Long itemId) throws ItemDoesntExistsException {
+        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        AppUser appUser = null;
+        if (user instanceof AppUser) {
+            appUser = (AppUser) user;
+        }
+
+        System.out.println(appUser);
         Item item = itemRepository.findById(itemId).orElse(null);
-        if(item == null){
-            throw new ItemDontExistsException("Item for given id don't exist");
+        if (item == null || !item.getIsActive() || (item.getIsHidden() && appUser == null) || (item.getIsHidden() && !(appUser == null) && !item.getUser().getId().equals(appUser.getUser().getId()))) {
+            throw new ItemDoesntExistsException("Item for given id don't exist");
         }
         return itemMapper.mapToItemDto(item);
     }
 
     @Override
-    public Item editItem(EditItemDto editItemDto) throws ItemDontExistsException {
+    public ItemDto editItem(EditItemDto editItemDto) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         Item item = itemRepository.findById(editItemDto.getItemId()).orElse(null);
-        if(item == null){
-            throw new ItemDontExistsException("Item with provided id don't exist");
+        if (item == null) {
+            throw new ItemDoesntExistsException("Item with provided id don't exist");
+        }
+        if (!appUser.getUser().getId().equals(item.getUser().getId())) {
+            throw new ItemDoesntBelongToUserException("You can edit only your item!");
         }
         Brand brand = brandRepository.findByNameIgnoreCase(editItemDto.getBrand());
-        if(brand == null){
+        if (brand == null) {
             brand = brandRepository.save(new Brand(null, editItemDto.getBrand()));
         }
         Color color = colorRepository.findByNameIgnoreCase(editItemDto.getColor());
@@ -129,8 +143,37 @@ public class ItemServiceImpl implements ItemService {
         item.setGender(Gender.valueOf(editItemDto.getGender()));
         item.setPrice(editItemDto.getPrice());
 
-        return itemRepository.save(item);
+        Item savedItem = itemRepository.save(item);
+        return itemMapper.mapToItemDto(savedItem);
 
+    }
+
+    private Item verifyRequest(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Item item = itemRepository.findById(itemId).orElse(null);
+        if (item == null) {
+            throw new ItemDoesntExistsException("Item with provided id don't exist");
+        }
+        if (!appUser.getUser().getId().equals(item.getUser().getId())) {
+            throw new ItemDoesntBelongToUserException("You can edit only your item!");
+        }
+        return item;
+    }
+
+
+    @Override
+    public void deleteItem(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+        Item item = verifyRequest(itemId);
+        item.setIsActive(false);
+        itemRepository.save(item);
+    }
+
+    @Override
+    public void manageItemVisibility(Long itemId, boolean status) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+        Item item = verifyRequest(itemId);
+        item.setIsHidden(status);
+        itemRepository.save(item);
     }
 
     public FileSystemResource find(Long imageId) {
