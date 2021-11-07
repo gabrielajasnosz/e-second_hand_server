@@ -1,5 +1,6 @@
 package com.esecondhand.esecondhand.controller;
 
+import com.esecondhand.esecondhand.domain.dto.EditItemDto;
 import com.esecondhand.esecondhand.domain.dto.ItemDto;
 import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
 import com.esecondhand.esecondhand.domain.entity.Item;
@@ -40,6 +41,17 @@ public class ItemController {
         try {
             ItemDto itemDto = itemService.getItem(itemId);
             return ResponseEntity.ok(itemDto);
+        } catch (ItemDontExistsException e) {
+            return ResponseEntity.notFound().build();
+        }
+
+    }
+
+    @RequestMapping(value = "/edit", method = RequestMethod.PUT)
+    public ResponseEntity<?> editItem(@Valid @RequestBody EditItemDto editItemDto) {
+        try {
+            Item item = itemService.editItem(editItemDto);
+            return ResponseEntity.ok(item);
         } catch (ItemDontExistsException e) {
             return ResponseEntity.notFound().build();
         }

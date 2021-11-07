@@ -61,7 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
         return brandMapper.mapToBrandDtoList(brandRepository.findAll());
 
     }
-    public Map<String,List<SizeDto>> getSizes() {
+    public Map<Long,List<SizeDto>> getSizes() {
 
         List<SizeDto> sizes = sizeMapper.mapToSizeDtoList(sizeRepository.findAll());
 

@@ -1,5 +1,6 @@
 package com.esecondhand.esecondhand.service;
 
+import com.esecondhand.esecondhand.domain.dto.EditItemDto;
 import com.esecondhand.esecondhand.domain.dto.ItemDto;
 import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
 import com.esecondhand.esecondhand.domain.entity.Item;
@@ -15,4 +16,6 @@ public interface ItemService {
     FileSystemResource find(Long imageId);
 
     ItemDto getItem(Long itemId) throws ItemDontExistsException;
+
+    Item editItem(EditItemDto editItemDto) throws ItemDontExistsException;
 }

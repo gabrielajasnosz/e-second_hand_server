@@ -13,7 +13,7 @@ public interface CategoryService {
 
     List<BrandDto> getBrands();
 
-    Map<String, List<SizeDto>> getSizes();
+    Map<Long, List<SizeDto>> getSizes();
 
     List<ColorDto> getColors();
 }

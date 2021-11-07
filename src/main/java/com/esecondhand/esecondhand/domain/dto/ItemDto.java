@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ItemDto {
     private Long id;
+    private String name;
     private Long userId;
     private String userDisplayName;
     private String description;
@@ -23,13 +24,14 @@ public class ItemDto {
     private Long categoryId;
     private Gender categoryGender;
     private String brand;
+    private Long brandId;
     private String color;
+    private Long colorId;
     private Double price;
     private String size;
+    private Long sizeId;
+    private Long productType;
     private Gender gender;
     private Date creationDate;
     private List<ItemPictureDto> itemPictures;
-
-
-
 }

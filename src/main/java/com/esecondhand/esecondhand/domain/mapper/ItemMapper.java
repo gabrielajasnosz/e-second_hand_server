@@ -44,9 +44,14 @@ public class ItemMapper {
         itemDto.setCategoryId(item.getCategory().getId());
         itemDto.setCategoryGender(item.getCategory().getGender());
         itemDto.setBrand(item.getBrand().getName());
+        itemDto.setBrandId(item.getBrand().getId());
         itemDto.setColor(item.getColor().getName());
+        itemDto.setColorId(item.getColor().getId());
         itemDto.setPrice(item.getPrice());
         itemDto.setSize(item.getSize().getName());
+        itemDto.setProductType(item.getSize().getProductType());
+        itemDto.setSizeId(item.getSize().getId());
+        itemDto.setName(item.getName());
         itemDto.setGender(item.getGender());
         itemDto.setCreationDate(item.getCreationDate());
         itemDto.setItemPictures(itemPictureMapper.mapToItemPictureDtoList(item.getItemPictures()));

@@ -12,6 +12,6 @@ import lombok.Setter;
 public class SizeDto {
     private Long id;
     private String name;
-    private String productType;
+    private Long productType;
 }
 

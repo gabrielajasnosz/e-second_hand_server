@@ -1,11 +1,9 @@
 package com.esecondhand.esecondhand.service.serviceImpl;
 
+import com.esecondhand.esecondhand.domain.dto.EditItemDto;
 import com.esecondhand.esecondhand.domain.dto.ItemDto;
 import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
-import com.esecondhand.esecondhand.domain.entity.AppUser;
-import com.esecondhand.esecondhand.domain.entity.Brand;
-import com.esecondhand.esecondhand.domain.entity.Item;
-import com.esecondhand.esecondhand.domain.entity.ItemPicture;
+import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
 import com.esecondhand.esecondhand.exception.ItemDontExistsException;
@@ -105,6 +103,34 @@ public class ItemServiceImpl implements ItemService {
             throw new ItemDontExistsException("Item for given id don't exist");
         }
         return itemMapper.mapToItemDto(item);
+    }
+
+    @Override
+    public Item editItem(EditItemDto editItemDto) throws ItemDontExistsException {
+        Item item = itemRepository.findById(editItemDto.getItemId()).orElse(null);
+        if(item == null){
+            throw new ItemDontExistsException("Item with provided id don't exist");
+        }
+        Brand brand = brandRepository.findByNameIgnoreCase(editItemDto.getBrand());
+        if(brand == null){
+            brand = brandRepository.save(new Brand(null, editItemDto.getBrand()));
+        }
+        Color color = colorRepository.findByNameIgnoreCase(editItemDto.getColor());
+        Size size = sizeRepository.findByNameIgnoreCase(editItemDto.getSize());
+
+        Category category = categoryRepository.findByNameIgnoreCase(editItemDto.getCategory());
+
+        item.setBrand(brand);
+        item.setCategory(category);
+        item.setColor(color);
+        item.setDescription(editItemDto.getDescription());
+        item.setName(editItemDto.getName());
+        item.setSize(size);
+        item.setGender(Gender.valueOf(editItemDto.getGender()));
+        item.setPrice(editItemDto.getPrice());
+
+        return itemRepository.save(item);
+
     }
 
     public FileSystemResource find(Long imageId) {
