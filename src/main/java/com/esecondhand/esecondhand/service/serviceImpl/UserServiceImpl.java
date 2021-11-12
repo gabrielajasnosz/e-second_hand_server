@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -65,8 +67,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         if (userDao.existsByEmail(userDto.getEmail())) {
             throw new EmailAlreadyExistsException("Provided email already exists!");
         }
-        Date date = new Date();
-        userDto.setCreationDate(date);
+        userDto.setCreationDate(LocalDateTime.now());
         User user = userMapper.mapRegisterUserDtoToUser(userDto);
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
         user.setEnabled(false);
@@ -92,11 +93,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     }
 
-    private Date calculateExpiryDate() {
+    private LocalDateTime calculateExpiryDate() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Timestamp(cal.getTime().getTime()));
         cal.add(Calendar.MINUTE, EXPIRATION);
-        return new Date(cal.getTime().getTime());
+
+        return LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
     }
 
     @Override

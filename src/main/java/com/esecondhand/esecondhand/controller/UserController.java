@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 
 @RestController
@@ -80,7 +81,7 @@ public class UserController {
             return new ResponseEntity<>("Your account is already enabled", HttpStatus.BAD_REQUEST);
         }
         Calendar cal = Calendar.getInstance();
-        if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())){
             String messageValue = "Token has expired.";
             System.out.println(messageValue);
             return new ResponseEntity<>("Token expired", HttpStatus.BAD_REQUEST);

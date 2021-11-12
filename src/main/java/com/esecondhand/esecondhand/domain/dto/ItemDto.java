@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class ItemDto {
     private Long sizeId;
     private Long productType;
     private Gender gender;
-    private Date creationDate;
+    private LocalDateTime creationDate;
     private Boolean isHidden;
     private Boolean isActive;
     private List<ItemPictureDto> itemPictures;

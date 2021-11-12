@@ -1,8 +1,7 @@
 package com.esecondhand.esecondhand.controller;
 
-import com.esecondhand.esecondhand.domain.dto.EditItemDto;
-import com.esecondhand.esecondhand.domain.dto.ItemDto;
-import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
+import com.esecondhand.esecondhand.domain.dto.*;
+import com.esecondhand.esecondhand.domain.entity.Item;
 import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
@@ -14,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 
 
 @RestController
@@ -23,13 +24,20 @@ public class ItemController {
 
     private final ItemService itemService;
 
+    private final Integer DEFAULT_PAGE_SIZE = 20;
+
+    private final String DEFAULT_SORTING_ORDER = "DESC";
+
+    private final String DEFAULT_SORTING_COLUMN = "creationDate";
+
+
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = {"multipart/form-data"})
-    public ResponseEntity<Long> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
-        return ResponseEntity.ok(itemService.saveItem(itemEntryDto));
+    public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.saveItem(itemEntryDto));
 
     }
 
@@ -74,6 +82,43 @@ public class ItemController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+    }
+
+    @RequestMapping(value = "/list", method = RequestMethod.POST)
+    public ResponseEntity<ItemListDto> getItems(@RequestBody ItemListFiltersDto itemListFiltersDto) throws ParseException {
+
+        if(itemListFiltersDto.getPageSize() == null){
+            itemListFiltersDto.setPageSize(DEFAULT_PAGE_SIZE);
+        }
+        if(itemListFiltersDto.getSortingColumn() == null){
+            itemListFiltersDto.setSortingColumn(DEFAULT_SORTING_COLUMN);
+        }
+        if(itemListFiltersDto.getSortingOrder() == null){
+            itemListFiltersDto.setSortingOrder(DEFAULT_SORTING_ORDER);
+        }
+
+
+        List<ItemPreviewDto> itemList = itemService.getItems(itemListFiltersDto);
+        ItemListDto itemListDto = new ItemListDto();
+
+        Object nextItemValue;
+        Long nextItemIndex = null;
+        if (itemList.size() > itemListFiltersDto.getPageSize()) {
+            nextItemIndex = itemList.get(itemList.size() - 1).getId();
+            if(itemListFiltersDto.getSortingColumn().equals("price")){
+                nextItemValue = itemList.get(itemList.size() - 1).getPrice();
+            }
+            else {
+                nextItemValue = itemList.get(itemList.size() - 1).getCreationDate().toString();
+            }
+            itemListDto.setNextItemId(nextItemIndex);
+            itemListDto.setNextItemValue(nextItemValue);
+            Long finalNextItemIndex = nextItemIndex;
+            itemList.removeIf(item -> item.getId().equals(finalNextItemIndex));
+        }
+
+        itemListDto.setItemList(itemList);
+        return ResponseEntity.ok().body(itemListDto);
     }
 
     @RequestMapping(value = "/itemVisibility", method = RequestMethod.PUT)

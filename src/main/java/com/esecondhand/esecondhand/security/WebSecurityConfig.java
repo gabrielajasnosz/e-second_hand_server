@@ -62,6 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/register",
                         "/item/image/**",
                         "/item/item**",
+                        "/item/list",
                         "/categories/**",
                         "/colors/**",
                         "/v2/api-docs",

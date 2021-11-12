@@ -1,8 +1,6 @@
 package com.esecondhand.esecondhand.service.serviceImpl;
 
-import com.esecondhand.esecondhand.domain.dto.EditItemDto;
-import com.esecondhand.esecondhand.domain.dto.ItemDto;
-import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
+import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
@@ -10,6 +8,7 @@ import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,15 +16,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 public class ItemServiceImpl implements ItemService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private ItemRepository itemRepository;
 
@@ -43,6 +54,12 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemMapper itemMapper;
 
+    private final Long DEFAULT_PAGE_SIZE = 20L;
+
+    private final String DEFAULT_SORTING_ORDER = "DESC";
+
+    private final String DEFAULT_SORTING_COLUMN = "creationDate";
+
 
     public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper1) {
         this.itemRepository = itemRepository;
@@ -57,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
 
-    public Long saveItem(ItemEntryDto itemEntryDto) throws IOException {
+    public ItemDto saveItem(ItemEntryDto itemEntryDto) throws IOException {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
 
@@ -71,6 +88,8 @@ public class ItemServiceImpl implements ItemService {
         item.setColor(colorRepository.findById(itemEntryDto.getColorId()).orElse(null));
         item.setSize(sizeRepository.findById(itemEntryDto.getSizeId()).orElse(null));
         item.setUser(userRepository.findById(appUser.getUser().getId()).orElse(null));
+        item.setIsActive(true);
+        item.setIsHidden(false);
         item.setBrand(brand);
 
         Item itemSaved = itemRepository.save(item);
@@ -80,7 +99,7 @@ public class ItemServiceImpl implements ItemService {
                 saveUploadedFile(file, itemSaved, false);
             }
         }
-        return itemSaved.getId();
+        return itemMapper.mapToItemDto(itemSaved);
     }
 
     private void saveUploadedFile(MultipartFile file, Item item, boolean isMainPicture) throws IOException {
@@ -93,7 +112,7 @@ public class ItemServiceImpl implements ItemService {
         Files.createDirectories(newFile.getParent());
 
         Files.write(newFile, file.getBytes());
-        itemPictureRepository.save(new ItemPicture(null, item, new Date(), FILE_LOCATION, isMainPicture));
+        itemPictureRepository.save(new ItemPicture(null, item, LocalDateTime.now(), FILE_LOCATION, isMainPicture));
 
 
     }
@@ -146,6 +165,22 @@ public class ItemServiceImpl implements ItemService {
         Item savedItem = itemRepository.save(item);
         return itemMapper.mapToItemDto(savedItem);
 
+    }
+
+    @Override
+    public List<ItemPreviewDto> getItems(ItemListFiltersDto itemListFiltersDto) throws ParseException {
+       List<Item> itemList = itemRepository.findItems(itemListFiltersDto);
+
+       Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
+
+       for(Item item : itemList){
+           mainPictureIdByItemId.put(item.getId(),itemPictureRepository.findMainImageIdByItemId(item.getId()));
+       }
+
+       List<ItemPreviewDto> itemPreviewDtoList = itemMapper.mapToPreviewList(itemList,mainPictureIdByItemId);
+
+
+       return itemPreviewDtoList;
     }
 
     private Item verifyRequest(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {

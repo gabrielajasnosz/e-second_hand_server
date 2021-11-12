@@ -1,14 +1,15 @@
 package com.esecondhand.esecondhand.domain.mapper;
 
-import com.esecondhand.esecondhand.domain.dto.ItemDto;
-import com.esecondhand.esecondhand.domain.dto.ItemPictureDto;
+import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.Gender;
 import com.esecondhand.esecondhand.domain.entity.Item;
-import com.esecondhand.esecondhand.domain.dto.ItemEntryDto;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ItemMapper {
@@ -24,7 +25,7 @@ public class ItemMapper {
         Item item = new Item();
         item.setName(itemEntryDto.getName());
         item.setDescription(itemEntryDto.getDescription());
-        item.setCreationDate(new Date());
+        item.setCreationDate(LocalDateTime.now());
         item.setPrice(itemEntryDto.getPrice());
         item.setGender(Gender.valueOf(itemEntryDto.getSex().toUpperCase()));
 
@@ -61,5 +62,19 @@ public class ItemMapper {
 
         return itemDto;
 
+    }
+
+    public List<ItemPreviewDto> mapToPreviewList(List<Item> itemList, Map<Long, Long> mainPictureIdByItemId){
+        return itemList.stream().map(e -> {
+            ItemPreviewDto itemPreviewDto = new ItemPreviewDto();
+            itemPreviewDto.setCreationDate(e.getCreationDate());
+            itemPreviewDto.setId(e.getId());
+            itemPreviewDto.setName(e.getName());
+            itemPreviewDto.setPrice(e.getPrice());
+            itemPreviewDto.setUserDisplayName(e.getUser().getDisplayName());
+            itemPreviewDto.setUserId(e.getUser().getId());
+            itemPreviewDto.setMainImageId(mainPictureIdByItemId.get(e.getId()));
+            return itemPreviewDto;
+        }).collect(Collectors.toList());
     }
 }

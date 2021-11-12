@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -28,6 +29,6 @@ public class VerificationToken {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    private Date expiryDate;
+    private LocalDateTime expiryDate;
 
 }

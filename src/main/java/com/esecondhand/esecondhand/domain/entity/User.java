@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -25,7 +26,7 @@ public class User {
     private String phoneNumber;
     private String city;
     private String zipCode;
-    private Date creationDate;
+    private LocalDateTime creationDate;
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String password;
