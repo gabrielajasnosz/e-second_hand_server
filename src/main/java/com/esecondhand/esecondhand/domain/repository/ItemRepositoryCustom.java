@@ -7,5 +7,5 @@ import java.text.ParseException;
 import java.util.List;
 
 interface ItemRepositoryCustom {
-    List<Item> findItems(ItemListFiltersDto itemListFiltersDto) throws ParseException;
+    List<Item> findItems(ItemListFiltersDto itemListFiltersDto, List<Long> list) throws ParseException;
 }

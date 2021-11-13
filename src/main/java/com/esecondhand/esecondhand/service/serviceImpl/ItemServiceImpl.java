@@ -25,10 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -164,12 +161,28 @@ public class ItemServiceImpl implements ItemService {
 
         Item savedItem = itemRepository.save(item);
         return itemMapper.mapToItemDto(savedItem);
+    }
 
+    private List<Long> getCategoryIds(List<Long> resultList, Category category){
+        resultList.add(category.getId());
+        if(category.getSubCategories().size()>0){
+            for(Category subcategory: category.getSubCategories()){
+                getCategoryIds(resultList,subcategory);
+            }
+        }
+        return resultList;
     }
 
     @Override
     public List<ItemPreviewDto> getItems(ItemListFiltersDto itemListFiltersDto) throws ParseException {
-       List<Item> itemList = itemRepository.findItems(itemListFiltersDto);
+        List<Long> result = new ArrayList<>();
+        if(itemListFiltersDto.getCategoryId() != null){
+            Category category = categoryRepository.findById(itemListFiltersDto.getCategoryId()).orElse(null);
+            if(category != null){
+                result = getCategoryIds(new ArrayList<>(),category);
+            }
+        }
+       List<Item> itemList = itemRepository.findItems(itemListFiltersDto, result);
 
        Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
 
@@ -202,6 +215,16 @@ public class ItemServiceImpl implements ItemService {
         Item item = verifyRequest(itemId);
         item.setIsActive(false);
         itemRepository.save(item);
+    }
+
+    @Override
+    public PriceExtremeValuesDto getPriceExtremeValues() {
+        PriceExtremeValuesDto priceExtremeValuesDto = new PriceExtremeValuesDto();
+        priceExtremeValuesDto.setMaxPrice(itemRepository.findMaxPrice());
+        priceExtremeValuesDto.setMinPrice(itemRepository.findMinPrice());
+
+        return priceExtremeValuesDto;
+
     }
 
     @Override

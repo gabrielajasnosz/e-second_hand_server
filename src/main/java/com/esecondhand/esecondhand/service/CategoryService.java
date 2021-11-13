@@ -13,7 +13,5 @@ public interface CategoryService {
 
     List<BrandDto> getBrands();
 
-    Map<Long, List<SizeDto>> getSizes();
-
     List<ColorDto> getColors();
 }

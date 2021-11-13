@@ -61,13 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
         return brandMapper.mapToBrandDtoList(brandRepository.findAll());
 
     }
-    public Map<Long,List<SizeDto>> getSizes() {
 
-        List<SizeDto> sizes = sizeMapper.mapToSizeDtoList(sizeRepository.findAll());
-
-        return sizes.stream().collect(Collectors.groupingBy(SizeDto::getProductType));
-
-    }
     public List<ColorDto> getColors() {
 
         return colorMapper.mapToColorDtoList(colorRepository.findAll());

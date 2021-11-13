@@ -2,6 +2,7 @@ package com.esecondhand.esecondhand.domain.repository;
 
 import com.esecondhand.esecondhand.domain.dto.ItemListFiltersDto;
 import com.esecondhand.esecondhand.domain.entity.*;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,7 +22,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     private String UTC_TIMEZONE_NAME = "UTC";
 
     @Override
-    public List<Item> findItems(ItemListFiltersDto itemListFiltersDto) throws ParseException {
+    public List<Item> findItems(ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Item> query = builder.createQuery(Item.class);
 
@@ -31,7 +32,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         Join<Item, Color> color = itemRoot.join("color");
         Join<Item, Size> size = itemRoot.join("size");
 
-        query.where(createWhereClause(itemRoot, category, brand, color, size, builder, itemListFiltersDto));
+        query.where(createWhereClause(itemRoot, category, brand, color, size, builder, itemListFiltersDto, categoryIds));
 
         if (itemListFiltersDto.getSortingOrder().equals("DESC")) {
             query.orderBy(builder.desc(itemRoot.get(itemListFiltersDto.getSortingColumn())));
@@ -45,11 +46,11 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return result;
     }
 
-    private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto) throws ParseException {
+    private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
         List<Predicate> predicates = new ArrayList<>();
 
         if (itemListFiltersDto.getCategoryId() != null) {
-            predicates.add(builder.equal(category.get("id"), itemListFiltersDto.getCategoryId()));
+            predicates.add(category.get("id").in(categoryIds));
         }
         if (itemListFiltersDto.getNextItemId() != null) {
             Expression<Boolean> e1;
@@ -75,9 +76,15 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
 
         }
+        if (!StringUtils.isBlank(itemListFiltersDto.getBrand())){
+            predicates.add(builder.equal(builder.upper(brand.get("name")), itemListFiltersDto.getBrand().toUpperCase()));
+        }
+        if (itemListFiltersDto.getGender() != null) {
+            predicates.add(builder.or(builder.equal(root.get("gender"), Gender.valueOf(itemListFiltersDto.getGender())),builder.equal(root.get("gender"), Gender.valueOf("UNDEFINED"))));
+        }
 
-        if (itemListFiltersDto.getBrandId() != null) {
-            predicates.add(builder.equal(brand.get("id"), itemListFiltersDto.getBrandId()));
+        if(itemListFiltersDto.getMinPrice() != null && itemListFiltersDto.getMaxPrice() != null){
+            predicates.add(builder.and(builder.le(root.get("price"),itemListFiltersDto.getMaxPrice()), builder.ge(root.get("price"), itemListFiltersDto.getMinPrice())));
         }
         if (itemListFiltersDto.getColorId() != null) {
             predicates.add(builder.equal(color.get("id"), itemListFiltersDto.getColorId()));
@@ -85,6 +92,9 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         if (itemListFiltersDto.getSizeId() != null) {
             predicates.add(builder.equal(size.get("id"), itemListFiltersDto.getSizeId()));
         }
+
+        predicates.add(builder.equal(root.get("isHidden"), false));
+        predicates.add(builder.equal(root.get("isActive"), true));
 
         Predicate[] predicatesArray = new Predicate[predicates.size()];
         return builder.and(predicates.toArray(predicatesArray));

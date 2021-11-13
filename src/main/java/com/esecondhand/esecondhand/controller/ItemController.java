@@ -57,6 +57,13 @@ public class ItemController {
 
     }
 
+    @RequestMapping(value = "/price/extremeValues", method = RequestMethod.GET)
+    public ResponseEntity<PriceExtremeValuesDto> getExtremePriceValues() {
+            PriceExtremeValuesDto priceExtremeValues = itemService.getPriceExtremeValues();
+            return ResponseEntity.ok(priceExtremeValues);
+
+    }
+
     @RequestMapping(value = "/edit", method = RequestMethod.PUT)
     public ResponseEntity<ItemDto> editItem(@Valid @RequestBody EditItemDto editItemDto) {
         try {

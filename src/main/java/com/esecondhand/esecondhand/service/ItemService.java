@@ -24,5 +24,7 @@ public interface ItemService {
 
     void deleteItem(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException;
 
+    PriceExtremeValuesDto getPriceExtremeValues();
+
     void manageItemVisibility(Long itemId, boolean status) throws ItemDoesntExistsException, ItemDoesntBelongToUserException;
 }

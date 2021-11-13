@@ -42,15 +42,4 @@ public class CategoryController {
 
     }
 
-    @RequestMapping(value = "/sizes", method = RequestMethod.GET)
-    public ResponseEntity<Map<Long, List<SizeDto>>> getSizes() {
-
-        Map<Long, List<SizeDto>> sizes = categoryService.getSizes();
-
-        return ResponseEntity.ok(sizes);
-
-    }
-
-
-
 }
