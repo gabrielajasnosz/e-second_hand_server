@@ -9,12 +9,13 @@ import com.esecondhand.esecondhand.domain.entity.Color;
 @Component
 public class ColorMapper {
     public List<ColorDto> mapToColorDtoList(List<Color> entity) {
-        return entity.stream().map(e -> {
-            ColorDto dto = new ColorDto();
-            dto.setId(e.getId());
-            dto.setName(e.getName());
-            dto.setHexCode(e.getHexCode());
-            return dto;
-        }).collect(Collectors.toList());
+        return entity.stream().map(this::mapToColorDto).collect(Collectors.toList());
+    }
+    public ColorDto mapToColorDto(Color entity){
+        ColorDto dto = new ColorDto();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setHexCode(entity.getHexCode());
+        return dto;
     }
 }

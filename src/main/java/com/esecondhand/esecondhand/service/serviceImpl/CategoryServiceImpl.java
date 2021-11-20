@@ -4,7 +4,6 @@ package com.esecondhand.esecondhand.service.serviceImpl;
 import com.esecondhand.esecondhand.domain.dto.BrandDto;
 import com.esecondhand.esecondhand.domain.dto.CategoryDto;
 import com.esecondhand.esecondhand.domain.dto.ColorDto;
-import com.esecondhand.esecondhand.domain.dto.SizeDto;
 import com.esecondhand.esecondhand.domain.entity.Category;
 import com.esecondhand.esecondhand.domain.mapper.BrandMapper;
 import com.esecondhand.esecondhand.domain.mapper.CategoryMapper;
@@ -15,8 +14,6 @@ import com.esecondhand.esecondhand.service.CategoryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -52,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> getCategories() {
         List <Category> categories = categoryRepository.findAllCategories();
 
-        return categoryMapper.mapToCategoryDto(categories);
+        return categoryMapper.mapToCategoryDtoList(categories);
 
     }
 

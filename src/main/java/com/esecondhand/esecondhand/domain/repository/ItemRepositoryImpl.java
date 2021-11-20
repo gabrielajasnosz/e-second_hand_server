@@ -2,7 +2,6 @@ package com.esecondhand.esecondhand.domain.repository;
 
 import com.esecondhand.esecondhand.domain.dto.ItemListFiltersDto;
 import com.esecondhand.esecondhand.domain.entity.*;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,9 +17,6 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private String ISO_DATE_FORMAT_ZERO_OFFSET = "yyyy-MM-dd'T'HH:mm:ss.SS";
-    private String UTC_TIMEZONE_NAME = "UTC";
-
     @Override
     public List<Item> findItems(ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -34,11 +30,16 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
         query.where(createWhereClause(itemRoot, category, brand, color, size, builder, itemListFiltersDto, categoryIds));
 
+        List<Order> orderList = new ArrayList();
         if (itemListFiltersDto.getSortingOrder().equals("DESC")) {
-            query.orderBy(builder.desc(itemRoot.get(itemListFiltersDto.getSortingColumn())));
+            orderList.add(builder.desc(itemRoot.get(itemListFiltersDto.getSortingColumn())));
+            orderList.add(builder.desc(itemRoot.get("id")));
         } else if (itemListFiltersDto.getSortingOrder().equals("ASC")) {
-            query.orderBy(builder.asc(itemRoot.get(itemListFiltersDto.getSortingColumn())));
+            orderList.add(builder.asc(itemRoot.get(itemListFiltersDto.getSortingColumn())));
+            orderList.add(builder.asc(itemRoot.get("id")));
         }
+
+        query.orderBy(orderList);
 
         final TypedQuery<Item> finalQuery = entityManager.createQuery(query);
         finalQuery.setMaxResults(itemListFiltersDto.getPageSize() + 1);
@@ -76,15 +77,15 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
 
         }
-        if (!StringUtils.isBlank(itemListFiltersDto.getBrand())){
-            predicates.add(builder.equal(builder.upper(brand.get("name")), itemListFiltersDto.getBrand().toUpperCase()));
+        if (itemListFiltersDto.getBrandId() != null) {
+            predicates.add(builder.equal(brand.get("id"), itemListFiltersDto.getBrandId()));
         }
         if (itemListFiltersDto.getGender() != null) {
-            predicates.add(builder.or(builder.equal(root.get("gender"), Gender.valueOf(itemListFiltersDto.getGender())),builder.equal(root.get("gender"), Gender.valueOf("UNDEFINED"))));
+            predicates.add(builder.or(builder.equal(root.get("gender"), Gender.valueOf(itemListFiltersDto.getGender())), builder.equal(root.get("gender"), Gender.valueOf("UNDEFINED"))));
         }
 
-        if(itemListFiltersDto.getMinPrice() != null && itemListFiltersDto.getMaxPrice() != null){
-            predicates.add(builder.and(builder.le(root.get("price"),itemListFiltersDto.getMaxPrice()), builder.ge(root.get("price"), itemListFiltersDto.getMinPrice())));
+        if (itemListFiltersDto.getMinPrice() != null && itemListFiltersDto.getMaxPrice() != null) {
+            predicates.add(builder.and(builder.le(root.get("price"), itemListFiltersDto.getMaxPrice()), builder.ge(root.get("price"), itemListFiltersDto.getMinPrice())));
         }
         if (itemListFiltersDto.getColorId() != null) {
             predicates.add(builder.equal(color.get("id"), itemListFiltersDto.getColorId()));

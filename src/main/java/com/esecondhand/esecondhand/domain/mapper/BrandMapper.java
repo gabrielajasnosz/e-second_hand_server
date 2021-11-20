@@ -17,4 +17,10 @@ public class BrandMapper {
             return dto;
         }).collect(Collectors.toList());
     }
+    public BrandDto mapToBrandDto(Brand entity) {
+            BrandDto dto = new BrandDto();
+            dto.setId(entity.getId());
+            dto.setName(entity.getName());
+            return dto;
+    }
 }
