@@ -1,12 +1,11 @@
 package com.esecondhand.esecondhand.controller;
 
 
-import com.esecondhand.esecondhand.domain.dto.JwtResponse;
-import com.esecondhand.esecondhand.domain.dto.RegisterDto;
-import com.esecondhand.esecondhand.domain.dto.UserDto;
+import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
+import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
 import com.esecondhand.esecondhand.service.UserService;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -36,9 +36,9 @@ public class UserController {
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity<?> signIn(@RequestBody UserDto userDto) throws Exception {
+    public ResponseEntity<?> signIn(@RequestBody LoginDto loginDto) throws Exception {
 
-        String token = userService.signIn(userDto);
+        String token = userService.signIn(loginDto);
 
         return ResponseEntity.ok(new JwtResponse(token));
 
@@ -90,6 +90,18 @@ public class UserController {
         user.setEnabled(true);
         userService.saveRegisteredUser(user);
         return new ResponseEntity<>("Account confirmed! You can now sign in to your account", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/search-for-users", method = RequestMethod.GET)
+    public ResponseEntity<List<UserPreviewDto>> findUsers(@RequestParam("name") String name) {
+        List<UserPreviewDto> users = userService.findUsers(name);
+        return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
+
+    @RequestMapping(value = "/get-user", method = RequestMethod.GET)
+    public ResponseEntity<UserDto> findUser(@RequestParam("id") Long id) throws ItemDoesntExistsException {
+        UserDto user = userService.findUser(id);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
 }

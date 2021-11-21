@@ -1,20 +1,25 @@
 package com.esecondhand.esecondhand.service.serviceImpl;
 
+import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.AppUser;
+import com.esecondhand.esecondhand.domain.entity.Item;
 import com.esecondhand.esecondhand.domain.entity.User;
-import com.esecondhand.esecondhand.domain.dto.RegisterDto;
-import com.esecondhand.esecondhand.domain.dto.UserDto;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
+import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
+import com.esecondhand.esecondhand.domain.mapper.UserMapper;
+import com.esecondhand.esecondhand.domain.repository.ItemPictureRepository;
+import com.esecondhand.esecondhand.domain.repository.ItemRepository;
+import com.esecondhand.esecondhand.domain.repository.UserRepository;
 import com.esecondhand.esecondhand.domain.repository.VerificationTokenRepository;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
-import com.esecondhand.esecondhand.domain.mapper.UserMapper;
-import com.esecondhand.esecondhand.domain.repository.UserRepository;
+import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
 import com.esecondhand.esecondhand.security.JwtTokenUtil;
 import com.esecondhand.esecondhand.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,15 +29,15 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
 
     private static final int EXPIRATION = 60 * 24;
 
-    private final UserRepository userDao;
+    private final UserRepository userRepository;
 
     private final AuthenticationManager authenticationManager;
 
@@ -44,19 +49,28 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final VerificationTokenRepository verificationTokenRepository;
 
+    private final ItemRepository itemRepository;
 
-    public UserServiceImpl(UserRepository userDao, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository) {
-        this.userDao = userDao;
+    private final ItemPictureRepository itemPictureRepository;
+
+    private final ItemMapper itemMapper;
+
+
+    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper) {
+        this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.bcryptEncoder = bcryptEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userMapper = userMapper;
         this.verificationTokenRepository = verificationTokenRepository;
+        this.itemRepository = itemRepository;
+        this.itemPictureRepository = itemPictureRepository;
+        this.itemMapper = itemMapper;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userDao.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user == null || !user.isEnabled()) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
@@ -64,14 +78,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     public User save(RegisterDto userDto) throws EmailAlreadyExistsException {
-        if (userDao.existsByEmail(userDto.getEmail())) {
+        if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new EmailAlreadyExistsException("Provided email already exists!");
         }
         userDto.setCreationDate(LocalDateTime.now());
         User user = userMapper.mapRegisterUserDtoToUser(userDto);
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
         user.setEnabled(false);
-        return userDao.save(user);
+        return userRepository.save(user);
     }
 
 
@@ -85,10 +99,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
     }
 
-    public String signIn(UserDto userDto) throws Exception {
+    public String signIn(LoginDto loginDto) throws Exception {
 
-        authenticate(userDto.getEmail(), userDto.getPassword());
-        AppUser userDetails = (AppUser) loadUserByUsername(userDto.getEmail());
+        authenticate(loginDto.getEmail(), loginDto.getPassword());
+        AppUser userDetails = (AppUser) loadUserByUsername(loginDto.getEmail());
         return jwtTokenUtil.generateToken(userDetails);
 
     }
@@ -112,11 +126,32 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Override
     public void saveRegisteredUser(User user) {
-        userDao.save(user);
+        userRepository.save(user);
     }
 
     @Override
     public VerificationToken getVerificationToken(String verificationToken) {
         return verificationTokenRepository.findByToken(verificationToken);
+    }
+
+    @Override
+    public List<UserPreviewDto> findUsers(String name) {
+        String keyword = name.trim().toUpperCase();
+        List<User> users = userRepository.findByDisplayNameIgnoreCaseContaining(keyword);
+        return userMapper.mapUserList(users);
+    }
+
+    @Override
+    public UserDto findUser(Long id) throws ItemDoesntExistsException {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null || !user.isEnabled()) {
+            throw new ItemDoesntExistsException("User with provided id doesn't exist");
+        }
+        UserDto userDto = userMapper.mapToUserDto(user);
+
+        return userDto;
+
     }
 }

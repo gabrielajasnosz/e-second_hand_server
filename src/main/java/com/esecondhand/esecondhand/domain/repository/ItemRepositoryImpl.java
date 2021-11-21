@@ -24,11 +24,12 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
         Root<Item> itemRoot = query.from(Item.class);
         Join<Item, Category> category = itemRoot.join("category");
+        Join<Item, User> user = itemRoot.join("user");
         Join<Item, Brand> brand = itemRoot.join("brand");
         Join<Item, Color> color = itemRoot.join("color");
         Join<Item, Size> size = itemRoot.join("size");
 
-        query.where(createWhereClause(itemRoot, category, brand, color, size, builder, itemListFiltersDto, categoryIds));
+        query.where(createWhereClause(itemRoot, category, brand, color, size, user, builder, itemListFiltersDto, categoryIds));
 
         List<Order> orderList = new ArrayList();
         if (itemListFiltersDto.getSortingOrder().equals("DESC")) {
@@ -47,11 +48,15 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return result;
     }
 
-    private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
+    private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, Join<Item, User> user, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
         List<Predicate> predicates = new ArrayList<>();
 
         if (itemListFiltersDto.getCategoryId() != null) {
             predicates.add(category.get("id").in(categoryIds));
+        }
+
+        if(itemListFiltersDto.getUserId() != null){
+            predicates.add(builder.equal(user.get("id"), itemListFiltersDto.getUserId()));
         }
         if (itemListFiltersDto.getNextItemId() != null) {
             Expression<Boolean> e1;
@@ -93,6 +98,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         if (itemListFiltersDto.getSizeId() != null) {
             predicates.add(builder.equal(size.get("id"), itemListFiltersDto.getSizeId()));
         }
+
+        predicates.add(builder.equal(user.get("enabled"), true));
 
         predicates.add(builder.equal(root.get("isHidden"), false));
         predicates.add(builder.equal(root.get("isActive"), true));

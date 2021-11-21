@@ -14,6 +14,7 @@ public class ItemListFiltersDto {
     private Long categoryId;
     private String gender;
     private Long brandId;
+    private Long userId;
     private Long colorId;
     private Long sizeId;
     private String sortingColumn;
