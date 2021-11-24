@@ -1,8 +1,11 @@
 package com.esecondhand.esecondhand.service.serviceImpl;
 
-import com.esecondhand.esecondhand.domain.dto.*;
+import com.esecondhand.esecondhand.domain.dto.LoginDto;
+import com.esecondhand.esecondhand.domain.dto.RegisterDto;
+import com.esecondhand.esecondhand.domain.dto.UserDto;
+import com.esecondhand.esecondhand.domain.dto.UserPreviewDto;
 import com.esecondhand.esecondhand.domain.entity.AppUser;
-import com.esecondhand.esecondhand.domain.entity.Item;
+import com.esecondhand.esecondhand.domain.entity.Gender;
 import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
@@ -12,9 +15,11 @@ import com.esecondhand.esecondhand.domain.repository.ItemRepository;
 import com.esecondhand.esecondhand.domain.repository.UserRepository;
 import com.esecondhand.esecondhand.domain.repository.VerificationTokenRepository;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.security.JwtTokenUtil;
 import com.esecondhand.esecondhand.service.UserService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -25,12 +30,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Calendar;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
@@ -142,16 +152,88 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public UserDto findUser(Long id) throws ItemDoesntExistsException {
+    public void setUserProfilePicture(MultipartFile file) throws IOException {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
+        String MAIN_DIR = "src/main/resources/images/";
+        String SUB_DIR = appUser.getUser().getId().toString() + "/profile-picture/";
+
+        String FILE_LOCATION = SUB_DIR + appUser.getUser().getId().toString() + ".png";
+        Path newFile = Paths.get(MAIN_DIR + FILE_LOCATION);
+        Files.createDirectories(newFile.getParent());
+
+        Files.deleteIfExists(newFile);
+        Files.write(newFile, file.getBytes());
+        User user = appUser.getUser();
+
+        user.setProfilePictureLocation(FILE_LOCATION);
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public void editProfile(UserDto userDto) {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        User user = appUser.getUser();
+
+        if (StringUtils.isBlank(userDto.getCity())) {
+            user.setCity(null);
+        } else {
+            user.setCity(userDto.getCity());
+        }
+
+        if (StringUtils.isBlank(userDto.getZipCode())) {
+            user.setZipCode(null);
+        } else {
+            user.setZipCode(userDto.getZipCode());
+        }
+
+        if (StringUtils.isBlank(userDto.getPhoneNumber())) {
+            user.setPhoneNumber(null);
+        } else {
+            user.setPhoneNumber(userDto.getPhoneNumber());
+        }
+
+        user.setGender(Gender.valueOf(userDto.getGender().toUpperCase()));
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public FileSystemResource findProfilePicture(Long userId) throws ObjectDoesntExistsException {
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null){
+            throw new ObjectDoesntExistsException("There is no image for provided user id.");
+        }
+        String location = "";
+        if(user.getProfilePictureLocation() == null){
+            location="empty-avatar.png";
+        }
+        else{
+            location=user.getProfilePictureLocation();
+        }
+        return findInFileSystem(location);
+    }
+
+    @Override
+    public UserDto findUser(Long id) throws ObjectDoesntExistsException {
         User user = userRepository.findById(id).orElse(null);
         if (user == null || !user.isEnabled()) {
-            throw new ItemDoesntExistsException("User with provided id doesn't exist");
+            throw new ObjectDoesntExistsException("User with provided id doesn't exist");
         }
         UserDto userDto = userMapper.mapToUserDto(user);
 
         return userDto;
 
+    }
+
+    private FileSystemResource findInFileSystem(String location) {
+        String MAIN_DIR = "src/main/resources/images/";
+        try {
+            return new FileSystemResource(Paths.get(MAIN_DIR + location));
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 }

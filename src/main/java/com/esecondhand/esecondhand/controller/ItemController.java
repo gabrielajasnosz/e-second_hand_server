@@ -1,9 +1,10 @@
 package com.esecondhand.esecondhand.controller;
 
 import com.esecondhand.esecondhand.domain.dto.*;
+import com.esecondhand.esecondhand.domain.entity.AppUser;
 import com.esecondhand.esecondhand.domain.entity.Item;
-import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,7 @@ public class ItemController {
         try {
             ItemDto itemDto = itemService.getItem(itemId);
             return ResponseEntity.ok(itemDto);
-        } catch (ItemDoesntExistsException e) {
+        } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
         }
 
@@ -64,15 +65,35 @@ public class ItemController {
 
     }
 
+
+    @RequestMapping(value = "/counters", method = RequestMethod.GET)
+    public ResponseEntity<?> getUserItemsCounters(@RequestParam("userId") Long userId) throws ObjectDoesntExistsException {
+        try{
+            CountersDto counters = itemService.getUserItemsCounters(userId);
+            return ResponseEntity.status(HttpStatus.OK).body(counters);
+        } catch (ObjectDoesntExistsException e){
+            return ResponseEntity.notFound().build();
+        }
+
+
+    }
+
+    @RequestMapping(value = "/hidden", method = RequestMethod.GET)
+    public ResponseEntity<List<ItemPreviewDto>> getUsersHiddenItem() {
+        List<ItemPreviewDto> hiddenItems = itemService.getHiddenItems();
+        return ResponseEntity.ok(hiddenItems);
+
+    }
+
     @RequestMapping(value = "/edit", method = RequestMethod.PUT)
     public ResponseEntity<ItemDto> editItem(@Valid @RequestBody EditItemDto editItemDto) {
         try {
             ItemDto itemDto = itemService.editItem(editItemDto);
             System.out.println(itemDto);
             return ResponseEntity.status(HttpStatus.OK).body(itemDto);
-        } catch (ItemDoesntExistsException e) {
+        } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
-        } catch (ItemDoesntBelongToUserException e) {
+        } catch (ObjectDoesntBelongToUserException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -83,9 +104,9 @@ public class ItemController {
         try {
             itemService.deleteItem(itemId);
             return ResponseEntity.status(HttpStatus.OK).build();
-        } catch (ItemDoesntExistsException e) {
+        } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
-        } catch (ItemDoesntBelongToUserException e) {
+        } catch (ObjectDoesntBelongToUserException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -133,9 +154,9 @@ public class ItemController {
         try {
             itemService.manageItemVisibility(itemId, status);
             return ResponseEntity.status(HttpStatus.OK).build();
-        } catch (ItemDoesntExistsException e) {
+        } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
-        } catch (ItemDoesntBelongToUserException e) {
+        } catch (ObjectDoesntBelongToUserException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 
 @Getter
@@ -22,4 +21,5 @@ public class UserDto {
     private String zipCode;
     private LocalDateTime creationDate;
     private String gender;
+    private String profilePictureLocation;
 }

@@ -7,10 +7,13 @@ import com.esecondhand.esecondhand.domain.dto.UserPreviewDto;
 import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
@@ -28,6 +31,11 @@ public interface UserService {
     VerificationToken getVerificationToken(String verificationToken);
 
     List<UserPreviewDto> findUsers(String name);
+    void setUserProfilePicture(MultipartFile file) throws IOException;
 
-    UserDto findUser(Long id) throws ItemDoesntExistsException;
+    void editProfile(UserDto userDto);
+
+    FileSystemResource findProfilePicture(Long userId) throws ObjectDoesntExistsException;
+
+    UserDto findUser(Long id) throws ObjectDoesntExistsException;
 }

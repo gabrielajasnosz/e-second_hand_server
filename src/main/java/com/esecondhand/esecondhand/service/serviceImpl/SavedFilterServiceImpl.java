@@ -9,8 +9,8 @@ import com.esecondhand.esecondhand.domain.entity.Gender;
 import com.esecondhand.esecondhand.domain.entity.SavedFilter;
 import com.esecondhand.esecondhand.domain.mapper.SavedFilterMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
-import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.SavedFilterService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -90,15 +90,29 @@ public class SavedFilterServiceImpl implements SavedFilterService {
     }
 
     @Override
-    public SavedFilterDto getSavedFilter(Long savedFilterId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+    public void deleteFilter(Long id) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        SavedFilter savedFilter = savedFilterRepository.findById(id).orElse(null);
+        if(savedFilter == null){
+            throw new ObjectDoesntExistsException("Provided id is incorrect.");
+        }
+        if(!savedFilter.getUser().getId().equals(appUser.getUser().getId())){
+            throw new ObjectDoesntBelongToUserException("Saved filter with provided does not belong to user.");
+        }
+        savedFilterRepository.deleteById(id);
+    }
+
+    @Override
+    public SavedFilterDto getSavedFilter(Long savedFilterId) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         SavedFilter savedFilter = savedFilterRepository.findById(savedFilterId).orElse(null);
         if(savedFilter == null){
-            throw new ItemDoesntExistsException("Provided id is incorrect.");
+            throw new ObjectDoesntExistsException("Provided id is incorrect.");
         }
         if(!savedFilter.getUser().getId().equals(appUser.getUser().getId())){
-            throw new ItemDoesntBelongToUserException("Saved filter with provided does not belong to user.");
+            throw new ObjectDoesntBelongToUserException("Saved filter with provided does not belong to user.");
         }
 
 

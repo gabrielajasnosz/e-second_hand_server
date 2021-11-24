@@ -1,9 +1,8 @@
 package com.esecondhand.esecondhand.service;
 
 import com.esecondhand.esecondhand.domain.dto.*;
-import com.esecondhand.esecondhand.domain.entity.Item;
-import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import org.springframework.core.io.FileSystemResource;
 
 import java.io.IOException;
@@ -16,15 +15,19 @@ public interface ItemService {
 
     FileSystemResource find(Long imageId);
 
-    ItemDto getItem(Long itemId) throws ItemDoesntExistsException;
+    ItemDto getItem(Long itemId) throws ObjectDoesntExistsException;
 
-    ItemDto editItem(EditItemDto editItemDto) throws ItemDoesntExistsException, ItemDoesntBelongToUserException;
+    ItemDto editItem(EditItemDto editItemDto) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
 
     List<ItemPreviewDto> getItems(ItemListFiltersDto itemListFiltersDto) throws ParseException;
 
-    void deleteItem(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException;
+    void deleteItem(Long itemId) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
 
     PriceExtremeValuesDto getPriceExtremeValues();
 
-    void manageItemVisibility(Long itemId, boolean status) throws ItemDoesntExistsException, ItemDoesntBelongToUserException;
+    List<ItemPreviewDto> getHiddenItems();
+
+    CountersDto getUserItemsCounters(Long userId) throws ObjectDoesntExistsException;
+
+    void manageItemVisibility(Long itemId, boolean status) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
 }

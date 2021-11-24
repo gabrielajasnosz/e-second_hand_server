@@ -44,6 +44,7 @@ public class UserMapper {
         userDto.setGender(user.getGender().toString());
         userDto.setPhoneNumber(user.getPhoneNumber());
         userDto.setZipCode(user.getZipCode());
+        userDto.setProfilePictureLocation(user.getProfilePictureLocation());
 
         return userDto;
     }

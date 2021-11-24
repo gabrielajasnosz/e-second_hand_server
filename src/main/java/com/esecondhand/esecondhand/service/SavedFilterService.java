@@ -4,8 +4,8 @@ import com.esecondhand.esecondhand.domain.dto.SavedFilterDto;
 import com.esecondhand.esecondhand.domain.dto.SavedFilterEntryDto;
 import com.esecondhand.esecondhand.domain.dto.SavedFilterPreviewDto;
 import com.esecondhand.esecondhand.domain.entity.SavedFilter;
-import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 
 import java.util.List;
 
@@ -14,5 +14,7 @@ public interface SavedFilterService {
 
     List<SavedFilterPreviewDto> getSavedFilters();
 
-    SavedFilterDto getSavedFilter(Long savedFilterId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException;
+    void deleteFilter(Long id) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
+
+    SavedFilterDto getSavedFilter(Long savedFilterId) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
 }

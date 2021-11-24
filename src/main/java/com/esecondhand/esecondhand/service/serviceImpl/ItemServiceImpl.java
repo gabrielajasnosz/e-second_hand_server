@@ -4,11 +4,10 @@ import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
-import com.esecondhand.esecondhand.exception.ItemDoesntBelongToUserException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +24,6 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -102,7 +99,7 @@ public class ItemServiceImpl implements ItemService {
     private void saveUploadedFile(MultipartFile file, Item item, boolean isMainPicture) throws IOException {
 
         String MAIN_DIR = "src/main/resources/images/";
-        String SUB_DIR = item.getUser().getId().toString() + "/" + item.getId().toString() + "/";
+        String SUB_DIR = item.getUser().getId().toString() + "/item-images/" + item.getId().toString() + "/";
 
         String FILE_LOCATION = SUB_DIR + item.getId().toString() + "-" + new Date().getTime() + "." + FilenameUtils.getExtension(file.getOriginalFilename());
         Path newFile = Paths.get(MAIN_DIR + FILE_LOCATION);
@@ -115,31 +112,29 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getItem(Long itemId) throws ItemDoesntExistsException {
+    public ItemDto getItem(Long itemId) throws ObjectDoesntExistsException {
         Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         AppUser appUser = null;
         if (user instanceof AppUser) {
             appUser = (AppUser) user;
         }
-
-        System.out.println(appUser);
         Item item = itemRepository.findById(itemId).orElse(null);
         if (item == null || !item.getIsActive() || (item.getIsHidden() && appUser == null) || (item.getIsHidden() && !(appUser == null) && !item.getUser().getId().equals(appUser.getUser().getId()))) {
-            throw new ItemDoesntExistsException("Item for given id don't exist");
+            throw new ObjectDoesntExistsException("Item for given id don't exist");
         }
         return itemMapper.mapToItemDto(item);
     }
 
     @Override
-    public ItemDto editItem(EditItemDto editItemDto) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+    public ItemDto editItem(EditItemDto editItemDto) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Item item = itemRepository.findById(editItemDto.getItemId()).orElse(null);
         if (item == null) {
-            throw new ItemDoesntExistsException("Item with provided id don't exist");
+            throw new ObjectDoesntExistsException("Item with provided id don't exist");
         }
         if (!appUser.getUser().getId().equals(item.getUser().getId())) {
-            throw new ItemDoesntBelongToUserException("You can edit only your item!");
+            throw new ObjectDoesntBelongToUserException("You can edit only your item!");
         }
         Brand brand = brandRepository.findByNameIgnoreCase(editItemDto.getBrand());
         if (brand == null) {
@@ -163,11 +158,11 @@ public class ItemServiceImpl implements ItemService {
         return itemMapper.mapToItemDto(savedItem);
     }
 
-    private List<Long> getCategoryIds(List<Long> resultList, Category category){
+    private List<Long> getCategoryIds(List<Long> resultList, Category category) {
         resultList.add(category.getId());
-        if(category.getSubCategories().size()>0){
-            for(Category subcategory: category.getSubCategories()){
-                getCategoryIds(resultList,subcategory);
+        if (category.getSubCategories().size() > 0) {
+            for (Category subcategory : category.getSubCategories()) {
+                getCategoryIds(resultList, subcategory);
             }
         }
         return resultList;
@@ -176,42 +171,42 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemPreviewDto> getItems(ItemListFiltersDto itemListFiltersDto) throws ParseException {
         List<Long> result = new ArrayList<>();
-        if(itemListFiltersDto.getCategoryId() != null){
+        if (itemListFiltersDto.getCategoryId() != null) {
             Category category = categoryRepository.findById(itemListFiltersDto.getCategoryId()).orElse(null);
-            if(category != null){
-                result = getCategoryIds(new ArrayList<>(),category);
+            if (category != null) {
+                result = getCategoryIds(new ArrayList<>(), category);
             }
         }
-       List<Item> itemList = itemRepository.findItems(itemListFiltersDto, result);
+        List<Item> itemList = itemRepository.findItems(itemListFiltersDto, result);
 
-       Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
+        Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
 
-       for(Item item : itemList){
-           mainPictureIdByItemId.put(item.getId(),itemPictureRepository.findMainImageIdByItemId(item.getId()));
-       }
+        for (Item item : itemList) {
+            mainPictureIdByItemId.put(item.getId(), itemPictureRepository.findMainImageIdByItemId(item.getId()));
+        }
 
-       List<ItemPreviewDto> itemPreviewDtoList = itemMapper.mapToPreviewList(itemList,mainPictureIdByItemId);
+        List<ItemPreviewDto> itemPreviewDtoList = itemMapper.mapToPreviewList(itemList, mainPictureIdByItemId);
 
 
-       return itemPreviewDtoList;
+        return itemPreviewDtoList;
     }
 
-    private Item verifyRequest(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+    private Item verifyRequest(Long itemId) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Item item = itemRepository.findById(itemId).orElse(null);
         if (item == null) {
-            throw new ItemDoesntExistsException("Item with provided id don't exist");
+            throw new ObjectDoesntExistsException("Item with provided id don't exist");
         }
         if (!appUser.getUser().getId().equals(item.getUser().getId())) {
-            throw new ItemDoesntBelongToUserException("You can edit only your item!");
+            throw new ObjectDoesntBelongToUserException("You can edit only your item!");
         }
         return item;
     }
 
 
     @Override
-    public void deleteItem(Long itemId) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+    public void deleteItem(Long itemId) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
         Item item = verifyRequest(itemId);
         item.setIsActive(false);
         itemRepository.save(item);
@@ -228,7 +223,42 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void manageItemVisibility(Long itemId, boolean status) throws ItemDoesntExistsException, ItemDoesntBelongToUserException {
+    public List<ItemPreviewDto> getHiddenItems() {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        List<Item> itemList = itemRepository.findAllByUserIdAndIsHiddenIsTrue(appUser.getUser().getId()).orElse(new ArrayList<>());
+
+        Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
+
+        for (Item item : itemList) {
+            mainPictureIdByItemId.put(item.getId(), itemPictureRepository.findMainImageIdByItemId(item.getId()));
+        }
+
+        List<ItemPreviewDto> itemPreviewDtoList = itemMapper.mapToPreviewList(itemList, mainPictureIdByItemId);
+        return itemPreviewDtoList;
+    }
+
+    @Override
+    public CountersDto getUserItemsCounters(Long userId) throws ObjectDoesntExistsException {
+        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        AppUser appUser = null;
+        if (user instanceof AppUser) {
+            appUser = (AppUser) user;
+        }
+        if (userRepository.findById(userId).orElse(null) == null) {
+            throw new ObjectDoesntExistsException("Item for given id don't exist");
+        }
+        CountersDto counters = new CountersDto();
+        if (appUser != null && appUser.getUser().getId().equals(userId)) {
+            counters.setHiddenItemsCounter(itemRepository.countByUserIdAndIsHiddenIsTrue(userId));
+        }
+        counters.setItemsCounter(itemRepository.countByUserIdAndIsHiddenIsFalse(userId));
+
+        return counters;
+    }
+
+    @Override
+    public void manageItemVisibility(Long itemId, boolean status) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
         Item item = verifyRequest(itemId);
         item.setIsHidden(status);
         itemRepository.save(item);

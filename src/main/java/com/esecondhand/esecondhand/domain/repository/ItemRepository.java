@@ -17,6 +17,13 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
 
     Optional<List<Item>> findAllByUserId(Long userId);
 
+    Optional<List<Item>> findAllByUserIdAndIsHiddenIsTrue(Long userId);
+
+    Long countByUserIdAndIsHiddenIsFalse(Long userId);
+
+    Long countByUserIdAndIsHiddenIsTrue(Long userId);
+
+
     @Query(value = "SELECT max(i.price) FROM Item i")
     Double findMaxPrice();
 

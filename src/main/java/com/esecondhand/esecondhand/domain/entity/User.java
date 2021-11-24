@@ -31,4 +31,5 @@ public class User {
     private Gender gender;
     private String password;
     private boolean enabled;
+    private String profilePictureLocation;
 }

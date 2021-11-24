@@ -5,17 +5,21 @@ import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
-import com.esecondhand.esecondhand.exception.ItemDoesntExistsException;
+import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.UserService;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.List;
@@ -99,9 +103,37 @@ public class UserController {
     }
 
     @RequestMapping(value = "/get-user", method = RequestMethod.GET)
-    public ResponseEntity<UserDto> findUser(@RequestParam("id") Long id) throws ItemDoesntExistsException {
-        UserDto user = userService.findUser(id);
+    public ResponseEntity<?> findUser(@RequestParam("id") Long id) throws ObjectDoesntExistsException {
+        UserDto user;
+        try{
+            user = userService.findUser(id);
+        }catch(ObjectDoesntExistsException objectDoesntExistsException){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    @RequestMapping(value = "/add-profile-picture", method = RequestMethod.PUT, consumes = {"multipart/form-data"})
+    public ResponseEntity<?> addProfilePicture(@RequestPart("file") MultipartFile file) throws ObjectDoesntExistsException, IOException {
+        userService.setUserProfilePicture(file);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/edit-profile", method = RequestMethod.PUT)
+    public ResponseEntity<?> editProfile(@RequestBody UserDto userDto) throws ObjectDoesntExistsException, IOException {
+        userService.editProfile(userDto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/user/profile-picture/{userId}", produces = MediaType.IMAGE_JPEG_VALUE)
+    ResponseEntity<Object> downloadImage(@PathVariable Long userId) throws ObjectDoesntExistsException {
+        FileSystemResource file;
+        try {
+            file = userService.findProfilePicture(userId);
+        } catch( ObjectDoesntExistsException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(file);
     }
 
 }

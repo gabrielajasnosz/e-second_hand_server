@@ -61,6 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/login",
                         "/register",
                         "/item/image/**",
+                        "/user/profile-picture/**",
                         "/item/item**",
                         "/item/list",
                         "/item/price/extremeValues",
