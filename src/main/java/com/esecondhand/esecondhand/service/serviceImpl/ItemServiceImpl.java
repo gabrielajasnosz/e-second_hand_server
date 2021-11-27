@@ -44,6 +44,8 @@ public class ItemServiceImpl implements ItemService {
 
     private UserRepository userRepository;
 
+    private CommentRepository commentRepository;
+
     private ItemPictureRepository itemPictureRepository;
 
     private ItemMapper itemMapper;
@@ -55,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
     private final String DEFAULT_SORTING_COLUMN = "creationDate";
 
 
-    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper1) {
+    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper1) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.brandRepository = brandRepository;
@@ -63,6 +65,7 @@ public class ItemServiceImpl implements ItemService {
         this.sizeRepository = sizeRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
         this.itemPictureRepository = itemPictureRepository;
         this.itemMapper = itemMapper1;
     }
@@ -253,6 +256,8 @@ public class ItemServiceImpl implements ItemService {
             counters.setHiddenItemsCounter(itemRepository.countByUserIdAndIsHiddenIsTrue(userId));
         }
         counters.setItemsCounter(itemRepository.countByUserIdAndIsHiddenIsFalse(userId));
+
+        counters.setCommentsCounter(commentRepository.countAllByReceiverId(userId));
 
         return counters;
     }

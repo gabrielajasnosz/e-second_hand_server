@@ -9,8 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CountersDto {
-    private Long itemsCounter;
-    private Long hiddenItemsCounter;
-    private Long commentsCounter;
+public class CommentDto {
+    private Long id;
+    private Long creatorId;
+    private String creatorName;
+    private int rating;
+    private String comment;
 }

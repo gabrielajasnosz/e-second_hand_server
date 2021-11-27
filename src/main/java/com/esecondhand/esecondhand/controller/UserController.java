@@ -125,6 +125,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
     @GetMapping(value = "/user/profile-picture/{userId}", produces = MediaType.IMAGE_JPEG_VALUE)
     ResponseEntity<Object> downloadImage(@PathVariable Long userId) throws ObjectDoesntExistsException {
         FileSystemResource file;
