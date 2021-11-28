@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -43,6 +44,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         comment.setComment(commentEntryDto.getComment());
         comment.setRating(commentEntryDto.getRating());
+        comment.setCreationDate(LocalDateTime.now());
 
         User user = userRepository.findById(commentEntryDto.getReceiverId()).orElse(null);
 

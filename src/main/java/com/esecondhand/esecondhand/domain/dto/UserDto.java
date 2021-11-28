@@ -22,4 +22,5 @@ public class UserDto {
     private LocalDateTime creationDate;
     private String gender;
     private String profilePictureLocation;
+    private Double rating;
 }

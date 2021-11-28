@@ -10,10 +10,7 @@ import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.mapper.UserMapper;
-import com.esecondhand.esecondhand.domain.repository.ItemPictureRepository;
-import com.esecondhand.esecondhand.domain.repository.ItemRepository;
-import com.esecondhand.esecondhand.domain.repository.UserRepository;
-import com.esecondhand.esecondhand.domain.repository.VerificationTokenRepository;
+import com.esecondhand.esecondhand.domain.repository.*;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.security.JwtTokenUtil;
@@ -65,8 +62,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final ItemMapper itemMapper;
 
+    private final CommentRepository commentRepository;
 
-    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper) {
+
+    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper, CommentRepository commentRepository) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.bcryptEncoder = bcryptEncoder;
@@ -76,6 +75,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         this.itemRepository = itemRepository;
         this.itemPictureRepository = itemPictureRepository;
         this.itemMapper = itemMapper;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -223,6 +223,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             throw new ObjectDoesntExistsException("User with provided id doesn't exist");
         }
         UserDto userDto = userMapper.mapToUserDto(user);
+        userDto.setRating(commentRepository.findUserAvgRating(id));
 
         return userDto;
 

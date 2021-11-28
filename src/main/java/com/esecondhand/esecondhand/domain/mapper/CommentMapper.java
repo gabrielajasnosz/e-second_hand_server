@@ -20,6 +20,7 @@ public class CommentMapper {
         dto.setCreatorId(entity.getCreator().getId());
         dto.setCreatorName(entity.getCreator().getDisplayName());
         dto.setRating(entity.getRating());
+        dto.setCreationDate(entity.getCreationDate());
         return dto;
     }
 }
