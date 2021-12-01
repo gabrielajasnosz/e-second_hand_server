@@ -25,7 +25,7 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    private final Integer DEFAULT_PAGE_SIZE = 20;
+    private final Integer DEFAULT_PAGE_SIZE = 10;
 
     private final String DEFAULT_SORTING_ORDER = "DESC";
 
@@ -159,6 +159,12 @@ public class ItemController {
         } catch (ObjectDoesntBelongToUserException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+    }
+
+    @RequestMapping(value = "/followed-users-items", method = RequestMethod.GET)
+    public ResponseEntity<List<ItemPreviewDto>> getFollowedUsersItems(@RequestParam("userId") Long userId, @RequestParam("page") int page, int pageSize) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getFollowedUsersItems(userId, page, pageSize));
 
     }
 

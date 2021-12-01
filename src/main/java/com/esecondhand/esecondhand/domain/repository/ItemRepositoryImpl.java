@@ -18,7 +18,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     private EntityManager entityManager;
 
     @Override
-    public List<Item> findItems(ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
+    public List<Item> findItems(ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds, List<Long> followedIds) throws ParseException {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Item> query = builder.createQuery(Item.class);
 
@@ -29,7 +29,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         Join<Item, Color> color = itemRoot.join("color");
         Join<Item, Size> size = itemRoot.join("size");
 
-        query.where(createWhereClause(itemRoot, category, brand, color, size, user, builder, itemListFiltersDto, categoryIds));
+        query.where(createWhereClause(itemRoot, category, brand, color, size, user, builder, itemListFiltersDto, categoryIds, followedIds));
 
         List<Order> orderList = new ArrayList();
         if (itemListFiltersDto.getSortingOrder().equals("DESC")) {
@@ -48,7 +48,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return result;
     }
 
-    private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, Join<Item, User> user, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds) throws ParseException {
+    private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, Join<Item, User> user, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds, List<Long> followedIds) throws ParseException {
         List<Predicate> predicates = new ArrayList<>();
 
         if (itemListFiltersDto.getCategoryId() != null) {
@@ -58,6 +58,11 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         if(itemListFiltersDto.getUserId() != null){
             predicates.add(builder.equal(user.get("id"), itemListFiltersDto.getUserId()));
         }
+
+        if(itemListFiltersDto.isOnlyFollowedUsers()){
+            predicates.add(user.get("id").in(followedIds));
+        }
+
         if (itemListFiltersDto.getNextItemId() != null) {
             Expression<Boolean> e1;
             Expression<Boolean> e2;

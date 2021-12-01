@@ -4,10 +4,7 @@ import com.esecondhand.esecondhand.domain.dto.LoginDto;
 import com.esecondhand.esecondhand.domain.dto.RegisterDto;
 import com.esecondhand.esecondhand.domain.dto.UserDto;
 import com.esecondhand.esecondhand.domain.dto.UserPreviewDto;
-import com.esecondhand.esecondhand.domain.entity.AppUser;
-import com.esecondhand.esecondhand.domain.entity.Gender;
-import com.esecondhand.esecondhand.domain.entity.User;
-import com.esecondhand.esecondhand.domain.entity.VerificationToken;
+import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.mapper.UserMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
@@ -64,8 +61,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final CommentRepository commentRepository;
 
+    private final FollowerRepository followerRepository;
 
-    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper, CommentRepository commentRepository) {
+
+    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper, CommentRepository commentRepository, FollowerRepository followerRepository) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.bcryptEncoder = bcryptEncoder;
@@ -76,6 +75,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         this.itemPictureRepository = itemPictureRepository;
         this.itemMapper = itemMapper;
         this.commentRepository = commentRepository;
+        this.followerRepository = followerRepository;
     }
 
     @Override
@@ -203,27 +203,30 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     public FileSystemResource findProfilePicture(Long userId) throws ObjectDoesntExistsException {
         User user = userRepository.findById(userId).orElse(null);
-        if(user == null){
+        if (user == null) {
             throw new ObjectDoesntExistsException("There is no image for provided user id.");
         }
         String location = "";
-        if(user.getProfilePictureLocation() == null){
-            location="empty-avatar.png";
-        }
-        else{
-            location=user.getProfilePictureLocation();
+        if (user.getProfilePictureLocation() == null) {
+            location = "empty-avatar.png";
+        } else {
+            location = user.getProfilePictureLocation();
         }
         return findInFileSystem(location);
     }
 
     @Override
     public UserDto findUser(Long id) throws ObjectDoesntExistsException {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         User user = userRepository.findById(id).orElse(null);
         if (user == null || !user.isEnabled()) {
             throw new ObjectDoesntExistsException("User with provided id doesn't exist");
         }
         UserDto userDto = userMapper.mapToUserDto(user);
         userDto.setRating(commentRepository.findUserAvgRating(id));
+        Follower follower = followerRepository.findFollower(appUser.getUser().getId(), id);
+        userDto.setFollowedByUser(follower != null);
 
         return userDto;
 

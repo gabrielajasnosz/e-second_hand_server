@@ -30,4 +30,6 @@ public interface ItemService {
     CountersDto getUserItemsCounters(Long userId) throws ObjectDoesntExistsException;
 
     void manageItemVisibility(Long itemId, boolean status) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
+
+    List<ItemPreviewDto> getFollowedUsersItems(Long userId, int page, int pageSize);
 }

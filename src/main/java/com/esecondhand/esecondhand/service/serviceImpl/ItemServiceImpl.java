@@ -9,6 +9,8 @@ import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,8 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemPictureRepository itemPictureRepository;
 
+    private FollowerRepository followerRepository;
+
     private ItemMapper itemMapper;
 
     private final Long DEFAULT_PAGE_SIZE = 20L;
@@ -57,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
     private final String DEFAULT_SORTING_COLUMN = "creationDate";
 
 
-    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper1) {
+    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, FollowerRepository followerRepository, ItemMapper itemMapper1) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.brandRepository = brandRepository;
@@ -67,6 +71,7 @@ public class ItemServiceImpl implements ItemService {
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.itemPictureRepository = itemPictureRepository;
+        this.followerRepository = followerRepository;
         this.itemMapper = itemMapper1;
     }
 
@@ -173,6 +178,17 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemPreviewDto> getItems(ItemListFiltersDto itemListFiltersDto) throws ParseException {
+
+        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        AppUser appUser = null;
+        if (user instanceof AppUser) {
+            appUser = (AppUser) user;
+        }
+        List<Long> followersIds = new ArrayList<>();
+        if(appUser != null && itemListFiltersDto.isOnlyFollowedUsers()){
+            followersIds = followerRepository.getUserFollowedUsersIds(appUser.getUserId());
+        }
+
         List<Long> result = new ArrayList<>();
         if (itemListFiltersDto.getCategoryId() != null) {
             Category category = categoryRepository.findById(itemListFiltersDto.getCategoryId()).orElse(null);
@@ -180,7 +196,8 @@ public class ItemServiceImpl implements ItemService {
                 result = getCategoryIds(new ArrayList<>(), category);
             }
         }
-        List<Item> itemList = itemRepository.findItems(itemListFiltersDto, result);
+
+        List<Item> itemList = itemRepository.findItems(itemListFiltersDto, result, followersIds);
 
         Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
 
@@ -259,6 +276,10 @@ public class ItemServiceImpl implements ItemService {
 
         counters.setCommentsCounter(commentRepository.countAllByReceiverId(userId));
 
+        counters.setFollowersCounter(followerRepository.countAllByFollowingId(userId));
+
+        counters.setFollowingCounter(followerRepository.countAllByFollowerId(userId));
+
         return counters;
     }
 
@@ -267,6 +288,28 @@ public class ItemServiceImpl implements ItemService {
         Item item = verifyRequest(itemId);
         item.setIsHidden(status);
         itemRepository.save(item);
+    }
+
+    @Override
+    public List<ItemPreviewDto> getFollowedUsersItems(Long userId, int page, int pageSize) {
+        Pageable pageRequest = PageRequest.of(page, pageSize);
+
+        List<Long> followersIds = followerRepository.getUserFollowedUsersIds(userId);
+
+        List<Item> items = itemRepository.findAllByUserIdInAndIsActiveIsTrueAndIsHiddenFalseOrderByCreationDateDesc(followersIds, pageRequest).orElse(null);
+
+        List<ItemPreviewDto> followedUsersItems = new ArrayList<>();
+        Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
+
+        if(items != null){
+            for (Item item : items) {
+                mainPictureIdByItemId.put(item.getId(), itemPictureRepository.findMainImageIdByItemId(item.getId()));
+            }
+            followedUsersItems = itemMapper.mapToPreviewList(items, mainPictureIdByItemId);
+        }
+
+        return followedUsersItems;
+
     }
 
     public FileSystemResource find(Long imageId) {

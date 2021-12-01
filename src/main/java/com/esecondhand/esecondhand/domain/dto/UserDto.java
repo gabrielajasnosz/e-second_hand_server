@@ -23,4 +23,5 @@ public class UserDto {
     private String gender;
     private String profilePictureLocation;
     private Double rating;
+    private boolean isFollowedByUser;
 }

@@ -1,6 +1,5 @@
 package com.esecondhand.esecondhand.domain.dto;
 
-import com.esecondhand.esecondhand.domain.entity.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,5 +23,6 @@ public class ItemListFiltersDto {
     private Integer pageSize;
     private Double maxPrice;
     private Double minPrice;
+    private boolean onlyFollowedUsers;
 
 }
