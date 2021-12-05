@@ -1,9 +1,6 @@
 package com.esecondhand.esecondhand.service.serviceImpl;
 
-import com.esecondhand.esecondhand.domain.dto.LoginDto;
-import com.esecondhand.esecondhand.domain.dto.RegisterDto;
-import com.esecondhand.esecondhand.domain.dto.UserDto;
-import com.esecondhand.esecondhand.domain.dto.UserPreviewDto;
+import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.mapper.UserMapper;
@@ -229,6 +226,17 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userDto.setFollowedByUser(follower != null);
 
         return userDto;
+
+    }
+
+    @Override
+    public void changePassword(PasswordEntryDto passwordEntryDto) throws Exception {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        User user = appUser.getUser();
+        authenticate(user.getEmail(), passwordEntryDto.getOldPassword());
+        user.setPassword(bcryptEncoder.encode(passwordEntryDto.getNewPassword()));
+        userRepository.save(user);
 
     }
 

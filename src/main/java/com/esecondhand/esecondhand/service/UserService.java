@@ -1,9 +1,6 @@
 package com.esecondhand.esecondhand.service;
 
-import com.esecondhand.esecondhand.domain.dto.RegisterDto;
-import com.esecondhand.esecondhand.domain.dto.LoginDto;
-import com.esecondhand.esecondhand.domain.dto.UserDto;
-import com.esecondhand.esecondhand.domain.dto.UserPreviewDto;
+import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.entity.VerificationToken;
 import com.esecondhand.esecondhand.exception.EmailAlreadyExistsException;
@@ -38,4 +35,6 @@ public interface UserService {
     FileSystemResource findProfilePicture(Long userId) throws ObjectDoesntExistsException;
 
     UserDto findUser(Long id) throws ObjectDoesntExistsException;
+
+    void changePassword(PasswordEntryDto passwordEntryDto) throws Exception;
 }

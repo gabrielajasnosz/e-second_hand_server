@@ -70,6 +70,18 @@ public class UserController {
         }
     }
 
+    @RequestMapping(value = "/change-password", method = RequestMethod.PUT)
+    public ResponseEntity<?> changePassword(@RequestBody PasswordEntryDto passwordEntryDto) {
+
+        try {
+            userService.changePassword(passwordEntryDto);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
     @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
 
