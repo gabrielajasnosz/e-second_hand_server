@@ -11,7 +11,4 @@ import java.util.Map;
 public interface CategoryService {
     List<CategoryDto> getCategories();
 
-    List<BrandDto> getBrands();
-
-    List<ColorDto> getColors();
 }

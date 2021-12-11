@@ -22,8 +22,8 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseEntity<?> addComment(@Valid @RequestBody CommentEntryDto commentEntryDto) throws ObjectDoesntExistsException {
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<?> addComment(@Valid @RequestBody CommentEntryDto commentEntryDto) {
         try {
             commentService.addComment(commentEntryDto);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -32,8 +32,8 @@ public class CommentController {
 
         }
     }
-    @RequestMapping(value = "/get", method = RequestMethod.GET)
-    public ResponseEntity<List<CommentDto>> getComments(@RequestParam("userId") Long userId, @RequestParam("page") int page) throws ObjectDoesntExistsException {
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<CommentDto>> getComments(@RequestParam("user") Long userId, @RequestParam("page") int page){
             return ResponseEntity.status(HttpStatus.OK).body(commentService.getComments(userId, page));
     }
 }

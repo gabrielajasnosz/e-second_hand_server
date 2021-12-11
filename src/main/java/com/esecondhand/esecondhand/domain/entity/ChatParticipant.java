@@ -12,11 +12,17 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Chat {
+public class ChatParticipant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String chatName;
+    @ManyToOne
+    @JoinColumn(name = "chat_id", referencedColumnName = "id")
+    private Chat chat;
+
+    @ManyToOne
+    @JoinColumn(name = "participant_id", referencedColumnName = "id")
+    private User participant;
 
 }

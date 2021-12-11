@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/item")
+@RequestMapping("/items")
 public class ItemController {
 
     private final ItemService itemService;
@@ -36,19 +36,19 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = {"multipart/form-data"})
+    @RequestMapping(method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.saveItem(itemEntryDto));
 
     }
 
     @GetMapping(value = "/image/{imageId}", produces = MediaType.IMAGE_JPEG_VALUE)
-    FileSystemResource downloadImage(@PathVariable Long imageId) throws Exception {
+    FileSystemResource downloadImage(@PathVariable Long imageId){
         return itemService.find(imageId);
     }
 
-    @RequestMapping(value = "/item", method = RequestMethod.GET)
-    public ResponseEntity<ItemDto> getItem(@RequestParam("itemId") Long itemId) {
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<ItemDto> getItem(@RequestParam("id") Long itemId) {
         try {
             ItemDto itemDto = itemService.getItem(itemId);
             return ResponseEntity.ok(itemDto);
@@ -58,7 +58,7 @@ public class ItemController {
 
     }
 
-    @RequestMapping(value = "/price/extremeValues", method = RequestMethod.GET)
+    @RequestMapping(value = "/price/extreme-values", method = RequestMethod.GET)
     public ResponseEntity<PriceExtremeValuesDto> getExtremePriceValues() {
             PriceExtremeValuesDto priceExtremeValues = itemService.getPriceExtremeValues();
             return ResponseEntity.ok(priceExtremeValues);
@@ -67,7 +67,7 @@ public class ItemController {
 
 
     @RequestMapping(value = "/counters", method = RequestMethod.GET)
-    public ResponseEntity<?> getUserItemsCounters(@RequestParam("userId") Long userId) throws ObjectDoesntExistsException {
+    public ResponseEntity<?> getUserItemsCounters(@RequestParam("user") Long userId) throws ObjectDoesntExistsException {
         try{
             CountersDto counters = itemService.getUserItemsCounters(userId);
             return ResponseEntity.status(HttpStatus.OK).body(counters);
@@ -85,7 +85,7 @@ public class ItemController {
 
     }
 
-    @RequestMapping(value = "/edit", method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<ItemDto> editItem(@Valid @RequestBody EditItemDto editItemDto) {
         try {
             ItemDto itemDto = itemService.editItem(editItemDto);
@@ -99,8 +99,8 @@ public class ItemController {
 
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteItem(@RequestParam("itemId") Long itemId) {
+    @RequestMapping(method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteItem(@RequestParam("id") Long itemId) {
         try {
             itemService.deleteItem(itemId);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -149,8 +149,8 @@ public class ItemController {
         return ResponseEntity.ok().body(itemListDto);
     }
 
-    @RequestMapping(value = "/itemVisibility", method = RequestMethod.PUT)
-    public ResponseEntity<?> changeItemVisibility(@RequestParam("itemId") Long itemId, @RequestParam("status") boolean status) {
+    @RequestMapping(value = "/item-visibility", method = RequestMethod.PUT)
+    public ResponseEntity<?> changeItemVisibility(@RequestParam("id") Long itemId, @RequestParam("status") boolean status) {
         try {
             itemService.manageItemVisibility(itemId, status);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -162,8 +162,8 @@ public class ItemController {
 
     }
 
-    @RequestMapping(value = "/followed-users-items", method = RequestMethod.GET)
-    public ResponseEntity<List<ItemPreviewDto>> getFollowedUsersItems(@RequestParam("userId") Long userId, @RequestParam("page") int page, int pageSize) {
+    @RequestMapping(value = "/followed-users", method = RequestMethod.GET)
+    public ResponseEntity<List<ItemPreviewDto>> getFollowedUsersItems(@RequestParam("user") Long userId, @RequestParam("page") int page, int pageSize) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getFollowedUsersItems(userId, page, pageSize));
 
     }

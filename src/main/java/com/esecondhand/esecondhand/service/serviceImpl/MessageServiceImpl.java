@@ -5,9 +5,10 @@ import com.esecondhand.esecondhand.domain.dto.MessageEntryDto;
 import com.esecondhand.esecondhand.domain.dto.MessagePreviewDto;
 import com.esecondhand.esecondhand.domain.entity.AppUser;
 import com.esecondhand.esecondhand.domain.entity.Chat;
+import com.esecondhand.esecondhand.domain.entity.ChatParticipant;
 import com.esecondhand.esecondhand.domain.entity.Message;
-import com.esecondhand.esecondhand.domain.entity.User;
 import com.esecondhand.esecondhand.domain.mapper.MessageMapper;
+import com.esecondhand.esecondhand.domain.repository.ChatParticipantRepository;
 import com.esecondhand.esecondhand.domain.repository.ChatRepository;
 import com.esecondhand.esecondhand.domain.repository.MessageRepository;
 import com.esecondhand.esecondhand.domain.repository.UserRepository;
@@ -30,11 +31,14 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageMapper messageMapper;
 
-    public MessageServiceImpl(UserRepository userRepository, MessageRepository messageRepository, ChatRepository chatRepository, MessageMapper messageMapper) {
+    private final ChatParticipantRepository chatParticipantRepository;
+
+    public MessageServiceImpl(UserRepository userRepository, MessageRepository messageRepository, ChatRepository chatRepository, MessageMapper messageMapper, ChatParticipantRepository chatParticipantRepository) {
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
         this.chatRepository = chatRepository;
         this.messageMapper = messageMapper;
+        this.chatParticipantRepository = chatParticipantRepository;
     }
 
     @Override
@@ -42,9 +46,30 @@ public class MessageServiceImpl implements MessageService {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Message message = new Message();
-        message.setCreationDate(LocalDateTime.now());
-        User receiver = userRepository.findById(messageEntryDto.getReceiverId()).orElse(null);
-        message.setSeen(false);
+        if (messageEntryDto.getChatId() != null) {
+            ChatParticipant chatParticipant = chatParticipantRepository.findChatParticipant(appUser.getUser().getId(), messageEntryDto.getChatId());
+            message.setSeen(false);
+            message.setCreationDate(LocalDateTime.now());
+            message.setAuthor(appUser.getUser());
+            message.setContent(messageEntryDto.getMessage());
+            message.setChat(chatParticipant.getChat());
+        } else {
+            Chat chat = chatRepository.save(new Chat());
+            ChatParticipant creator = new ChatParticipant();
+            ChatParticipant receiver = new ChatParticipant();
+            receiver.setChat(chat);
+            receiver.setParticipant(userRepository.findById(messageEntryDto.getReceiverId()).orElse(null));
+            chatParticipantRepository.save(receiver);
+            creator.setChat(chat);
+            creator.setParticipant(appUser.getUser());
+            chatParticipantRepository.save(creator);
+            message.setSeen(false);
+            message.setCreationDate(LocalDateTime.now());
+            message.setAuthor(appUser.getUser());
+            message.setContent(messageEntryDto.getMessage());
+            message.setChat(chat);
+        }
+
 
         return messageRepository.save(message);
     }
@@ -53,19 +78,19 @@ public class MessageServiceImpl implements MessageService {
     public List<MessagePreviewDto> getAllMessages() {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Chat> chatIds = chatRepository.findChatsByParticipant(appUser.getUser().getId());
-        List<MessagePreviewDto> messagePreviewDtos = chatIds.stream().map(chat -> {
-            Message message = messageRepository.findMessagePreviewByChatId(chat.getId());
-            if(message != null){
+        List<ChatParticipant> chatIds = chatParticipantRepository.findAllByParticipantId(appUser.getUser().getId());
+        List<MessagePreviewDto> messagePreviewDtos = chatIds.stream().map(chatParticipant -> {
+            Message message = messageRepository.findMessagePreviewByChatId(chatParticipant.getChat().getId());
+            if (message != null) {
                 MessagePreviewDto messagePreviewDto = messageMapper.mapToMessagePreviewDto(message);
-                if(appUser.getUser().getId().equals(chat.getFirstParticipant().getId())){
-                    messagePreviewDto.setConversationalistId(chat.getSecondParticipant().getId());
-                    messagePreviewDto.setConversationalist(chat.getSecondParticipant().getDisplayName());
-                } else {
-                    messagePreviewDto.setConversationalistId(chat.getFirstParticipant().getId());
-                    messagePreviewDto.setConversationalist(chat.getFirstParticipant().getDisplayName());
+                ChatParticipant conversationalist = chatParticipantRepository.findChatParticipant(appUser.getUser().getId(), chatParticipant.getChat().getId());
+                Chat chat = chatRepository.findById(chatParticipant.getChat().getId()).orElse(null);
+                messagePreviewDto.setConversationalistId(conversationalist.getParticipant().getId());
+                messagePreviewDto.setConversationalist(conversationalist.getParticipant().getDisplayName());
+                messagePreviewDto.setChatId(chatParticipant.getChat().getId());
+                if (chat != null) {
+                    messagePreviewDto.setChatName(chat.getChatName());
                 }
-                messagePreviewDto.setChatId(chat.getId());
                 return messagePreviewDto;
             }
             return null;
@@ -75,8 +100,23 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageDto> getChatMessages(Long chatId) {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         List<Message> messages = messageRepository.findAllByChatIdOrderByCreationDateAsc(chatId);
+        List<Message> messagesToChangeStatus = messages.stream().filter((e) -> !e.getAuthor().getId().equals(appUser.getUser().getId()) && !e.isSeen()).collect(Collectors.toList());
+        messagesToChangeStatus.forEach((m) -> {
+            m.setSeen(true);
+            messageRepository.save(m);
+        });
         return messageMapper.mapMessagesList(messages);
+    }
+
+    @Override
+    public Long getMessagesCounter() {
+        AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        List<Long> userChatIds = chatParticipantRepository.findUserChatIds(appUser.getUser().getId());
+        return messageRepository.findUnreadCounter(userChatIds, appUser.getUser().getId());
     }
 
 }

@@ -2,6 +2,8 @@ package com.esecondhand.esecondhand.security;
 
 import com.esecondhand.esecondhand.service.serviceImpl.UserServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +26,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
 
+    Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
+
     public JwtRequestFilter(@Lazy UserServiceImpl userService, JwtTokenUtil jwtTokenUtil) {
         this.userService = userService;
         this.jwtTokenUtil = jwtTokenUtil;
@@ -34,7 +38,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        logger.debug("--------------------------------------------------------------");
+
         final String requestTokenHeader = request.getHeader("Authorization");
+
 
         String username = null;
         String jwtToken = null;

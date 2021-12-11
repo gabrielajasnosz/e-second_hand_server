@@ -26,19 +26,10 @@ public class CategoryController {
     }
 
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<List<CategoryDto>> getCategories() {
 
         return ResponseEntity.ok(categoryService.getCategories());
-
-    }
-
-    @RequestMapping(value = "/brands", method = RequestMethod.GET)
-    public ResponseEntity<List<BrandDto>> getBrands() {
-
-        List<BrandDto> brands = categoryService.getBrands();
-
-        return ResponseEntity.ok(brands);
 
     }
 

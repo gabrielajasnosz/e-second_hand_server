@@ -20,29 +20,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     private CategoryMapper categoryMapper;
 
-    private SizeMapper sizeMapper;
-
-    private BrandRepository brandRepository;
-
-    private SizeRepository sizeRepository;
-
-    private BrandMapper brandMapper;
-
-    private ColorMapper colorMapper;
-
-    private ColorRepository colorRepository;
-
     private CategoryRepository categoryRepository;
 
-
-    public CategoryServiceImpl(CategoryMapper categoryMapper, BrandRepository brandRepository, SizeMapper sizeMapper, SizeRepository sizeRepository, BrandMapper brandMapper, ColorMapper colorMapper, ColorRepository colorRepository, CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(CategoryMapper categoryMapper, CategoryRepository categoryRepository) {
         this.categoryMapper = categoryMapper;
-        this.brandRepository = brandRepository;
-        this.sizeMapper = sizeMapper;
-        this.sizeRepository = sizeRepository;
-        this.brandMapper = brandMapper;
-        this.colorMapper = colorMapper;
-        this.colorRepository = colorRepository;
         this.categoryRepository = categoryRepository;
     }
 
@@ -53,15 +34,4 @@ public class CategoryServiceImpl implements CategoryService {
 
     }
 
-    public List<BrandDto> getBrands() {
-
-        return brandMapper.mapToBrandDtoList(brandRepository.findAll());
-
-    }
-
-    public List<ColorDto> getColors() {
-
-        return colorMapper.mapToColorDtoList(colorRepository.findAll());
-
-    }
 }

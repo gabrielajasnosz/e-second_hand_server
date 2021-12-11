@@ -22,7 +22,7 @@ public class SizeController {
         this.sizeService = sizeService;
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<Map<Long, List<SizeDto>>> getSizes() {
 
         Map<Long, List<SizeDto>> sizes = sizeService.getSizes();

@@ -31,7 +31,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
@@ -59,7 +61,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private final CommentRepository commentRepository;
 
     private final FollowerRepository followerRepository;
-
 
     public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper, CommentRepository commentRepository, FollowerRepository followerRepository) {
         this.userRepository = userRepository;

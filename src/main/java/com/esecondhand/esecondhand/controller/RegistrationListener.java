@@ -39,7 +39,7 @@ public class RegistrationListener implements
         String recipientAddress = user.getEmail();
         String subject = "Registration Confirmation";
         String confirmationUrl
-                = event.getAppUrl() + "/confirmRegistration/" + token;
+                = event.getAppUrl() + "/users/registration/" + token;
         String message = "Click link below to confirm your account";
 
         SimpleMailMessage email = new SimpleMailMessage();

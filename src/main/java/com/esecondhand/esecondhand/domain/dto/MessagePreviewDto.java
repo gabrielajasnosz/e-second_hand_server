@@ -16,4 +16,5 @@ public class MessagePreviewDto {
     private String lastMessage;
     private boolean isLastMessageSeen;
     private Long chatId;
+    private String chatName;
 }

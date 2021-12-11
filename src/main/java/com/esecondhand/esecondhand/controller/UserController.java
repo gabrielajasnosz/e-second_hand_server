@@ -26,6 +26,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
+@RequestMapping("/users")
 public class UserController {
 
     private UserService userService;
@@ -70,7 +71,7 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/change-password", method = RequestMethod.PUT)
+    @RequestMapping(value = "/password", method = RequestMethod.PUT)
     public ResponseEntity<?> changePassword(@RequestBody PasswordEntryDto passwordEntryDto) {
 
         try {
@@ -82,7 +83,7 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
+    @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
 
 
@@ -108,14 +109,14 @@ public class UserController {
         return new ResponseEntity<>("Account confirmed! You can now sign in to your account", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/search-for-users", method = RequestMethod.GET)
+    @RequestMapping(value = "/keyword", method = RequestMethod.GET)
     public ResponseEntity<List<UserPreviewDto>> findUsers(@RequestParam("name") String name) {
         List<UserPreviewDto> users = userService.findUsers(name);
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
-    @RequestMapping(value = "/get-user", method = RequestMethod.GET)
-    public ResponseEntity<?> findUser(@RequestParam("id") Long id) throws ObjectDoesntExistsException {
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<?> findUser(@RequestParam("id") Long id){
         UserDto user;
         try{
             user = userService.findUser(id);
@@ -125,21 +126,21 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    @RequestMapping(value = "/add-profile-picture", method = RequestMethod.PUT, consumes = {"multipart/form-data"})
-    public ResponseEntity<?> addProfilePicture(@RequestPart("file") MultipartFile file) throws ObjectDoesntExistsException, IOException {
+    @RequestMapping(value = "/profile-picture", method = RequestMethod.PUT, consumes = {"multipart/form-data"})
+    public ResponseEntity<?> addProfilePicture(@RequestPart("file") MultipartFile file) throws IOException {
         userService.setUserProfilePicture(file);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/edit-profile", method = RequestMethod.PUT)
-    public ResponseEntity<?> editProfile(@RequestBody UserDto userDto) throws ObjectDoesntExistsException, IOException {
+    @RequestMapping(method = RequestMethod.PUT)
+    public ResponseEntity<?> editProfile(@RequestBody UserDto userDto){
         userService.editProfile(userDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
-    @GetMapping(value = "/user/profile-picture/{userId}", produces = MediaType.IMAGE_JPEG_VALUE)
-    ResponseEntity<Object> downloadImage(@PathVariable Long userId) throws ObjectDoesntExistsException {
+    @GetMapping(value = "/profile-picture/{userId}", produces = MediaType.IMAGE_JPEG_VALUE)
+    ResponseEntity<Object> downloadImage(@PathVariable Long userId){
         FileSystemResource file;
         try {
             file = userService.findProfilePicture(userId);

@@ -11,4 +11,5 @@ public interface MessageService {
     Message saveMessage(MessageEntryDto messageEntryDto);
     List<MessagePreviewDto> getAllMessages();
     List<MessageDto> getChatMessages(Long chatId);
+    Long getMessagesCounter();
 }

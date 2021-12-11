@@ -20,8 +20,8 @@ public class FollowerController {
         this.followerService = followerService;
     }
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseEntity<?> addToFollowers(@RequestParam("userId") Long userId) throws ObjectDoesntExistsException {
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<?> addToFollowers(@RequestParam("user") Long userId){
         try {
             followerService.addToFollowed(userId);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -30,14 +30,14 @@ public class FollowerController {
         }
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteFromFollowed(@RequestParam("userId") Long userId) {
+    @RequestMapping(method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteFromFollowed(@RequestParam("user") Long userId) {
         followerService.deleteFromFollowed(userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @RequestMapping(value = "/get-followers", method = RequestMethod.GET)
-    public ResponseEntity<?> getFollowers(@RequestParam("userId") Long userId) throws ObjectDoesntExistsException {
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<?> getFollowers(@RequestParam("user") Long userId){
         try {
             List<UserPreviewDto> followers = followerService.getFollowers(userId);
             return ResponseEntity.status(HttpStatus.OK).body(followers);
@@ -46,8 +46,8 @@ public class FollowerController {
         }
     }
 
-    @RequestMapping(value = "/get-following", method = RequestMethod.GET)
-    public ResponseEntity<?> getFollowing(@RequestParam("userId") Long userId) throws ObjectDoesntExistsException {
+    @RequestMapping(value = "/following", method = RequestMethod.GET)
+    public ResponseEntity<?> getFollowing(@RequestParam("user") Long userId){
         try {
             List<UserPreviewDto> followers = followerService.getFollowing(userId);
             return ResponseEntity.status(HttpStatus.OK).body(followers);

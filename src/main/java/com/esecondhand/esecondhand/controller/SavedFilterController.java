@@ -24,14 +24,14 @@ public class SavedFilterController {
         this.savedFilterService = savedFilterService;
     }
 
-    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<SavedFilter> saveFilters(@RequestBody SavedFilterEntryDto savedFilterEntryDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedFilterService.saveFilters(savedFilterEntryDto));
 
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteFilter(@RequestParam("id") Long id) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException {
+    @RequestMapping(method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteFilter(@RequestParam("id") Long id){
         try {
             savedFilterService.deleteFilter(id);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -42,12 +42,12 @@ public class SavedFilterController {
         }
     }
 
-    @RequestMapping(value = "/get-saved-filters", method = RequestMethod.GET)
-    public ResponseEntity<List<SavedFilterPreviewDto>> saveFiltersList() {
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public ResponseEntity<List<SavedFilterPreviewDto>> getFiltersList() {
         return ResponseEntity.status(HttpStatus.OK).body(savedFilterService.getSavedFilters());
     }
 
-    @RequestMapping(value = "/get-filter", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<SavedFilterDto> getFilter(@RequestParam("id") Long id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(savedFilterService.getSavedFilter(id));
