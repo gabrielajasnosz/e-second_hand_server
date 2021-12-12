@@ -2,8 +2,6 @@ package com.esecondhand.esecondhand.domain.mapper;
 
 import com.esecondhand.esecondhand.domain.dto.MessageDto;
 import com.esecondhand.esecondhand.domain.dto.MessagePreviewDto;
-import com.esecondhand.esecondhand.domain.dto.UserPreviewDto;
-import com.esecondhand.esecondhand.domain.entity.Follower;
 import com.esecondhand.esecondhand.domain.entity.Message;
 import org.springframework.stereotype.Component;
 

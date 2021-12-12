@@ -1,7 +1,6 @@
 package com.esecondhand.esecondhand.domain.repository;
 
 import com.esecondhand.esecondhand.domain.entity.Message;
-import com.esecondhand.esecondhand.domain.entity.SavedFilter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

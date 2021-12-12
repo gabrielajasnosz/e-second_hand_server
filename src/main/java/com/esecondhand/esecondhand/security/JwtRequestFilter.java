@@ -38,8 +38,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        logger.debug("--------------------------------------------------------------");
-
         final String requestTokenHeader = request.getHeader("Authorization");
 
 

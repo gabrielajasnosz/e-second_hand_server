@@ -8,7 +8,7 @@ import com.esecondhand.esecondhand.domain.entity.Message;
 import java.util.List;
 
 public interface MessageService {
-    Message saveMessage(MessageEntryDto messageEntryDto);
+    List<MessageDto> saveMessage(MessageEntryDto messageEntryDto);
     List<MessagePreviewDto> getAllMessages();
     List<MessageDto> getChatMessages(Long chatId);
     Long getMessagesCounter();

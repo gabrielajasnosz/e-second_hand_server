@@ -1,38 +1,46 @@
 package com.esecondhand.esecondhand.security;
 
+import com.esecondhand.esecondhand.service.UserService;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import java.util.List;
-
 @Configuration
 @EnableWebSocketMessageBroker
+@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private HandShakeInterceptor handShakeInterceptor;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    public WebSocketConfig(HandShakeInterceptor handShakeInterceptor) {
-        this.handShakeInterceptor = handShakeInterceptor;
+    private final UserService userService;
+
+    private AuthChannelInterceptor channelInterceptor;
+
+    public WebSocketConfig(JwtTokenUtil jwtTokenUtil, UserService userService, AuthChannelInterceptor channelInterceptor) {
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.userService = userService;
+        this.channelInterceptor = channelInterceptor;
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.setApplicationDestinationPrefixes("/ws");
         config.enableSimpleBroker("/topic");
-
-//        registry.enableSimpleBroker("/queue", "/topic");
-//        registry.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-//        registry.addEndpoint("/chat").addInterceptors(handShakeInterceptor).setAllowedOriginPatterns("*").withSockJS();
-//        registry.addEndpoint("/messenger", "/call").addInterceptors(handShakeInterceptor).setAllowedOrigins("*").withSockJS();
-        registry.addEndpoint("/chat").addInterceptors(handShakeInterceptor).setAllowedOrigins("http://localhost:3000").withSockJS().setWebSocketEnabled(true);
-//        registry.addEndpoint("/messenger", "/call").setAllowedOriginPatterns();
+        registry.addEndpoint("/chat").setAllowedOrigins("http://localhost:3000").withSockJS().setWebSocketEnabled(true);
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(channelInterceptor);
 
     }
+
 }

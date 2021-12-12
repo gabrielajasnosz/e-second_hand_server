@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/messages")
+@RequestMapping("/chat")
 public class MessageController {
 
 
@@ -29,8 +29,7 @@ public class MessageController {
 
     @MessageMapping("/add")
     @SendTo("/topic/message")
-    public Message postMessage(MessageEntryDto messageEntryDto) {
-        logger.debug("-------------------------------------");
+    public List<MessageDto> postMessage(MessageEntryDto messageEntryDto) {
         return messageService.saveMessage(messageEntryDto);
     }
 

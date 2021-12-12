@@ -91,7 +91,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
             predicates.add(builder.equal(brand.get("id"), itemListFiltersDto.getBrandId()));
         }
         if (itemListFiltersDto.getGender() != null) {
-            predicates.add(builder.or(builder.equal(root.get("gender"), Gender.valueOf(itemListFiltersDto.getGender())), builder.equal(root.get("gender"), Gender.valueOf("UNDEFINED"))));
+            predicates.add(builder.or(builder.equal(root.get("gender"), Gender.valueOf(itemListFiltersDto.getGender().toUpperCase())), builder.equal(root.get("gender"), Gender.valueOf("UNDEFINED"))));
         }
 
         if (itemListFiltersDto.getMinPrice() != null && itemListFiltersDto.getMaxPrice() != null) {

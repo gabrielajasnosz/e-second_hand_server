@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,15 +43,15 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message saveMessage(MessageEntryDto messageEntryDto) {
+    public List<MessageDto> saveMessage(MessageEntryDto messageEntryDto) {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Message message = new Message();
         if (messageEntryDto.getChatId() != null) {
-            ChatParticipant chatParticipant = chatParticipantRepository.findChatParticipant(appUser.getUser().getId(), messageEntryDto.getChatId());
+            ChatParticipant chatParticipant = chatParticipantRepository.findChatParticipant(messageEntryDto.getAuthorId(), messageEntryDto.getChatId());
             message.setSeen(false);
             message.setCreationDate(LocalDateTime.now());
-            message.setAuthor(appUser.getUser());
+            message.setAuthor(userRepository.findById(messageEntryDto.getAuthorId()).orElse(null));
             message.setContent(messageEntryDto.getMessage());
             message.setChat(chatParticipant.getChat());
         } else {
@@ -61,17 +62,20 @@ public class MessageServiceImpl implements MessageService {
             receiver.setParticipant(userRepository.findById(messageEntryDto.getReceiverId()).orElse(null));
             chatParticipantRepository.save(receiver);
             creator.setChat(chat);
-            creator.setParticipant(appUser.getUser());
+            creator.setParticipant(userRepository.findById(messageEntryDto.getAuthorId()).orElse(null));
             chatParticipantRepository.save(creator);
             message.setSeen(false);
             message.setCreationDate(LocalDateTime.now());
-            message.setAuthor(appUser.getUser());
+            message.setAuthor(userRepository.findById(messageEntryDto.getAuthorId()).orElse(null));
             message.setContent(messageEntryDto.getMessage());
             message.setChat(chat);
         }
+        Message newMessage = messageRepository.save(message);
+       MessageDto messageDto = messageMapper.mapToMessageDto(newMessage);
+        List<MessageDto> list = new ArrayList<>();
+        list.add(messageDto);
 
-
-        return messageRepository.save(message);
+        return list;
     }
 
     @Override
