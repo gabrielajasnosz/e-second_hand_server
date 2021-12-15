@@ -24,4 +24,5 @@ public class UserDto {
     private String profilePictureLocation;
     private Double rating;
     private boolean isFollowedByUser;
+    private Long chatWithUserId;
 }

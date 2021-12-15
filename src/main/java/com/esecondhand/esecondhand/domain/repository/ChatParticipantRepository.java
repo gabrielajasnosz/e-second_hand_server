@@ -15,6 +15,9 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     @Query("SELECT c.chat.id FROM ChatParticipant c WHERE c.participant.id != ?1")
     List<Long> findUserChatIds(Long userId);
 
+    @Query("SELECT c.chat.id FROM ChatParticipant c WHERE c.participant.id = ?1")
+    List<Long> findUserChats(Long userId);
+
     @Query("SELECT c FROM ChatParticipant c WHERE c.chat.id = ?2 and c.participant.id != ?1")
     ChatParticipant findChatParticipant(Long userId, Long chatId);
 }

@@ -40,6 +40,11 @@ public class UserController {
     }
 
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> signIn(@RequestBody LoginDto loginDto) throws Exception {
 
@@ -71,6 +76,11 @@ public class UserController {
         }
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
     @RequestMapping(value = "/password", method = RequestMethod.PUT)
     public ResponseEntity<?> changePassword(@RequestBody PasswordEntryDto passwordEntryDto) {
 
@@ -83,6 +93,12 @@ public class UserController {
         }
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not found"),
+    })
     @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
 
@@ -98,7 +114,7 @@ public class UserController {
             return new ResponseEntity<>("Your account is already enabled", HttpStatus.BAD_REQUEST);
         }
         Calendar cal = Calendar.getInstance();
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())){
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             String messageValue = "Token has expired.";
             System.out.println(messageValue);
             return new ResponseEntity<>("Token expired", HttpStatus.BAD_REQUEST);
@@ -109,42 +125,69 @@ public class UserController {
         return new ResponseEntity<>("Account confirmed! You can now sign in to your account", HttpStatus.OK);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
     @RequestMapping(value = "/keyword", method = RequestMethod.GET)
     public ResponseEntity<List<UserPreviewDto>> findUsers(@RequestParam("name") String name) {
         List<UserPreviewDto> users = userService.findUsers(name);
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found"),
+    })
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<?> findUser(@RequestParam("id") Long id){
+    public ResponseEntity<?> findUser(@RequestParam("id") Long id) {
         UserDto user;
-        try{
+        try {
             user = userService.findUser(id);
-        }catch(ObjectDoesntExistsException objectDoesntExistsException){
+        } catch (ObjectDoesntExistsException objectDoesntExistsException) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found"),
+    })
     @RequestMapping(value = "/profile-picture", method = RequestMethod.PUT, consumes = {"multipart/form-data"})
     public ResponseEntity<?> addProfilePicture(@RequestPart("file") MultipartFile file) throws IOException {
         userService.setUserProfilePicture(file);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found"),
+    })
     @RequestMapping(method = RequestMethod.PUT)
-    public ResponseEntity<?> editProfile(@RequestBody UserDto userDto){
+    public ResponseEntity<?> editProfile(@RequestBody UserDto userDto) {
         userService.editProfile(userDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 404, message = "Not found"),
+    })
     @GetMapping(value = "/profile-picture/{userId}", produces = MediaType.IMAGE_JPEG_VALUE)
-    ResponseEntity<Object> downloadImage(@PathVariable Long userId){
+    ResponseEntity<Object> downloadImage(@PathVariable Long userId) {
         FileSystemResource file;
         try {
             file = userService.findProfilePicture(userId);
-        } catch( ObjectDoesntExistsException e){
+        } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.status(HttpStatus.OK).body(file);

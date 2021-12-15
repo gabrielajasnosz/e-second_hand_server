@@ -1,11 +1,11 @@
 package com.esecondhand.esecondhand.controller;
 
 import com.esecondhand.esecondhand.domain.dto.*;
-import com.esecondhand.esecondhand.domain.entity.AppUser;
-import com.esecondhand.esecondhand.domain.entity.Item;
 import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +36,13 @@ public class ItemController {
         this.itemService = itemService;
     }
 
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
     @RequestMapping(method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.saveItem(itemEntryDto));
@@ -43,10 +50,15 @@ public class ItemController {
     }
 
     @GetMapping(value = "/image/{imageId}", produces = MediaType.IMAGE_JPEG_VALUE)
-    FileSystemResource downloadImage(@PathVariable Long imageId){
+    FileSystemResource downloadImage(@PathVariable Long imageId) {
         return itemService.find(imageId);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<ItemDto> getItem(@RequestParam("id") Long itemId) {
         try {
@@ -58,26 +70,40 @@ public class ItemController {
 
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+    })
     @RequestMapping(value = "/price/extreme-values", method = RequestMethod.GET)
     public ResponseEntity<PriceExtremeValuesDto> getExtremePriceValues() {
-            PriceExtremeValuesDto priceExtremeValues = itemService.getPriceExtremeValues();
-            return ResponseEntity.ok(priceExtremeValues);
+        PriceExtremeValuesDto priceExtremeValues = itemService.getPriceExtremeValues();
+        return ResponseEntity.ok(priceExtremeValues);
 
     }
 
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
     @RequestMapping(value = "/counters", method = RequestMethod.GET)
-    public ResponseEntity<?> getUserItemsCounters(@RequestParam("user") Long userId) throws ObjectDoesntExistsException {
-        try{
+    public ResponseEntity<?> getUserItemsCounters(@RequestParam("user") Long userId) {
+        try {
             CountersDto counters = itemService.getUserItemsCounters(userId);
             return ResponseEntity.status(HttpStatus.OK).body(counters);
-        } catch (ObjectDoesntExistsException e){
+        } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
         }
 
 
     }
-
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
     @RequestMapping(value = "/hidden", method = RequestMethod.GET)
     public ResponseEntity<List<ItemPreviewDto>> getUsersHiddenItem() {
         List<ItemPreviewDto> hiddenItems = itemService.getHiddenItems();
@@ -85,6 +111,12 @@ public class ItemController {
 
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<ItemDto> editItem(@Valid @RequestBody EditItemDto editItemDto) {
         try {
@@ -99,6 +131,12 @@ public class ItemController {
 
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
     @RequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteItem(@RequestParam("id") Long itemId) {
         try {
@@ -109,19 +147,22 @@ public class ItemController {
         } catch (ObjectDoesntBelongToUserException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK")
+    })
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public ResponseEntity<ItemListDto> getItems(@RequestBody ItemListFiltersDto itemListFiltersDto) throws ParseException {
 
-        if(itemListFiltersDto.getPageSize() == null){
+        if (itemListFiltersDto.getPageSize() == null) {
             itemListFiltersDto.setPageSize(DEFAULT_PAGE_SIZE);
         }
-        if(itemListFiltersDto.getSortingColumn() == null){
+        if (itemListFiltersDto.getSortingColumn() == null) {
             itemListFiltersDto.setSortingColumn(DEFAULT_SORTING_COLUMN);
         }
-        if(itemListFiltersDto.getSortingOrder() == null){
+        if (itemListFiltersDto.getSortingOrder() == null) {
             itemListFiltersDto.setSortingOrder(DEFAULT_SORTING_ORDER);
         }
 
@@ -133,10 +174,9 @@ public class ItemController {
         Long nextItemIndex = null;
         if (itemList.size() > itemListFiltersDto.getPageSize()) {
             nextItemIndex = itemList.get(itemList.size() - 1).getId();
-            if(itemListFiltersDto.getSortingColumn().equals("price")){
+            if (itemListFiltersDto.getSortingColumn().equals("price")) {
                 nextItemValue = itemList.get(itemList.size() - 1).getPrice();
-            }
-            else {
+            } else {
                 nextItemValue = itemList.get(itemList.size() - 1).getCreationDate().toString();
             }
             itemListDto.setNextItemId(nextItemIndex);
@@ -149,6 +189,12 @@ public class ItemController {
         return ResponseEntity.ok().body(itemListDto);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
     @RequestMapping(value = "/item-visibility", method = RequestMethod.PUT)
     public ResponseEntity<?> changeItemVisibility(@RequestParam("id") Long itemId, @RequestParam("status") boolean status) {
         try {
@@ -162,6 +208,11 @@ public class ItemController {
 
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized")
+    })
     @RequestMapping(value = "/followed-users", method = RequestMethod.GET)
     public ResponseEntity<List<ItemPreviewDto>> getFollowedUsersItems(@RequestParam("user") Long userId, @RequestParam("page") int page, int pageSize) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getFollowedUsersItems(userId, page, pageSize));

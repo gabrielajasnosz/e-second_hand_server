@@ -9,6 +9,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,9 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                         userDetails, null, userDetails.getAuthorities());
 
                 accessor.setUser(usernamePasswordAuthenticationToken);
+
+
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
             }
         }

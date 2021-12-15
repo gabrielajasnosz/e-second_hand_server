@@ -31,9 +31,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserDetailsService, UserService {
@@ -62,7 +60,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final FollowerRepository followerRepository;
 
-    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper, CommentRepository commentRepository, FollowerRepository followerRepository) {
+    private final ChatParticipantRepository chatParticipantRepository;
+
+    private final ChatRepository chatRepository;
+
+    public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder bcryptEncoder, JwtTokenUtil jwtTokenUtil, UserMapper userMapper, VerificationTokenRepository verificationTokenRepository, ItemRepository itemRepository, ItemPictureRepository itemPictureRepository, ItemMapper itemMapper, CommentRepository commentRepository, FollowerRepository followerRepository, ChatParticipantRepository chatParticipantRepository, ChatRepository chatRepository) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.bcryptEncoder = bcryptEncoder;
@@ -74,6 +76,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         this.itemMapper = itemMapper;
         this.commentRepository = commentRepository;
         this.followerRepository = followerRepository;
+        this.chatParticipantRepository = chatParticipantRepository;
+        this.chatRepository = chatRepository;
     }
 
     @Override
@@ -226,6 +230,10 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         Follower follower = followerRepository.findFollower(appUser.getUser().getId(), id);
         userDto.setFollowedByUser(follower != null);
 
+        Chat chat = chatRepository.findChat(appUser.getUser().getId(), id);
+        if(chat != null){
+            userDto.setChatWithUserId(chat.getId());
+        }
         return userDto;
 
     }
