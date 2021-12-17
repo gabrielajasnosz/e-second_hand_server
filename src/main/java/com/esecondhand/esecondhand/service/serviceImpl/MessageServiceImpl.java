@@ -75,12 +75,15 @@ public class MessageServiceImpl implements MessageService {
             message.setAuthor(appUser.getUser());
             message.setContent(messageEntryDto.getMessage());
             message.setChat(chat);
+            simpMessagingTemplate.convertAndSendToUser(appUser.getUser().getId().toString(), "/newChat", chat);
         }
         Message newMessage = messageRepository.save(message);
         MessageDto messageDto = messageMapper.mapToMessageDto(newMessage);
         messageDto.setChatId(message.getChat().getId());
         List<MessageDto> list = new ArrayList<>();
         list.add(messageDto);
+        ChatParticipant chatParticipant = chatParticipantRepository.findChatParticipant(appUser.getUser().getId(), messageDto.getChatId());
+        simpMessagingTemplate.convertAndSendToUser(chatParticipant.getParticipant().getId().toString(), "/newNotification", list);
         simpMessagingTemplate.convertAndSendToUser(newMessage.getChat().getId().toString(), "/newMessage", list);
         System.out.println("lol");
     }

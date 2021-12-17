@@ -1,0 +1,51 @@
+.greeting {
+    display: flex;
+    flex-direction: row;
+    text-transform: capitalize;
+    font-family: Open Sans, sans-serif;
+    font-size: 20px;
+}
+.text {
+    font-family: Open Sans, sans-serif;
+    font-size: 16px;
+}
+
+.link {
+    font-family: Open Sans, sans-serif;
+    font-size: 16px;
+    color: #6b705c;
+    font-weight: bold;
+    font-style: normal;
+    cursor: pointer;
+}
+
+.signature-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.signature {
+    margin-left: 10px;
+    font-size: 16px;
+    font-family: Open Sans, sans-serif;
+    font-style: italic;
+    font-weight: bold;
+}
+
+img {
+    width: 90px;
+    height: 90px;
+}
+
+.signature-with-logo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.container {
+    width: 100vh;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
