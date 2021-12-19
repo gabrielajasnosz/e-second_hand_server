@@ -96,6 +96,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         userDto.setCreationDate(LocalDateTime.now());
         User user = userMapper.mapRegisterUserDtoToUser(userDto);
         user.setPassword(bcryptEncoder.encode(user.getPassword()));
+        user.setRole("USER");
         user.setEnabled(false);
         return userRepository.save(user);
     }

@@ -272,7 +272,7 @@ public class ItemServiceImpl implements ItemService {
         if (appUser != null && appUser.getUser().getId().equals(userId)) {
             counters.setHiddenItemsCounter(itemRepository.countByUserIdAndIsHiddenIsTrue(userId));
         }
-        counters.setItemsCounter(itemRepository.countByUserIdAndIsHiddenIsFalse(userId));
+        counters.setItemsCounter(itemRepository.countByUserIdAndIsHiddenIsFalseAndIsActiveIsTrue(userId));
 
         counters.setCommentsCounter(commentRepository.countAllByReceiverId(userId));
 
@@ -309,6 +309,16 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return followedUsersItems;
+
+    }
+
+    @Override
+    public void reportItem(ReportDto reportDto) {
+        Item item = itemRepository.findById(reportDto.getItemId()).orElse(null);
+        if( item != null ){
+            item.setIsActive(false);
+            itemRepository.save(item);
+        }
 
     }
 

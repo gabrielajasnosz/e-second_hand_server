@@ -1,17 +1,21 @@
 package com.esecondhand.esecondhand.controller;
 
 import com.esecondhand.esecondhand.domain.dto.*;
+import com.esecondhand.esecondhand.domain.entity.Item;
+import com.esecondhand.esecondhand.domain.repository.ItemRepository;
 import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
@@ -31,9 +35,15 @@ public class ItemController {
 
     private final String DEFAULT_SORTING_COLUMN = "creationDate";
 
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public ItemController(ItemService itemService) {
+    private final ItemRepository itemRepository;
+
+
+    public ItemController(ItemService itemService, ApplicationEventPublisher applicationEventPublisher, ItemRepository itemRepository) {
         this.itemService = itemService;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.itemRepository = itemRepository;
     }
 
 
@@ -217,6 +227,25 @@ public class ItemController {
     public ResponseEntity<List<ItemPreviewDto>> getFollowedUsersItems(@RequestParam("user") Long userId, @RequestParam("page") int page, int pageSize) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getFollowedUsersItems(userId, page, pageSize));
 
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not found")
+    })
+    @RequestMapping(value = "/report", method = RequestMethod.POST)
+    public ResponseEntity<?> reportItem(@RequestBody ReportDto reportDto, HttpServletRequest request) {
+            String appUrl = request.getContextPath();
+            Item item = itemRepository.findById(reportDto.getItemId()).orElse(null);
+            String cause = reportDto.getCause();
+            if(item != null){
+                applicationEventPublisher.publishEvent(new OnCreateReportCompleteEvent(item, cause,
+                        request.getLocale(), appUrl));
+            }
+            itemService.reportItem(reportDto);
+            return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

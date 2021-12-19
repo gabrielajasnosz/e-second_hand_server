@@ -14,4 +14,9 @@ public interface ItemPictureRepository extends JpaRepository<ItemPicture, Long> 
     @Query("SELECT ip.id FROM ItemPicture ip WHERE ip.item.id = ?1 and ip.isMainPicture = true")
     Long findMainImageIdByItemId(Long itemId);
 
+    @Query("SELECT ip FROM ItemPicture ip WHERE ip.item.id = ?1 and ip.isMainPicture = true")
+    ItemPicture findMainImageUrlByItemId(long itemId);
+
+
+
 }

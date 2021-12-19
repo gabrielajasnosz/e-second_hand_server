@@ -32,7 +32,7 @@ public class FollowerController {
     public ResponseEntity<?> addToFollowers(@RequestParam("user") Long userId){
         try {
             followerService.addToFollowed(userId);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
         }

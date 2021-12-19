@@ -32,4 +32,6 @@ public interface ItemService {
     void manageItemVisibility(Long itemId, boolean status) throws ObjectDoesntExistsException, ObjectDoesntBelongToUserException;
 
     List<ItemPreviewDto> getFollowedUsersItems(Long userId, int page, int pageSize);
+
+    void reportItem(ReportDto reportDto);
 }

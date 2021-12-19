@@ -4,7 +4,9 @@ package com.esecondhand.esecondhand.service.serviceImpl;
 import com.esecondhand.esecondhand.domain.dto.BrandDto;
 import com.esecondhand.esecondhand.domain.dto.CategoryDto;
 import com.esecondhand.esecondhand.domain.dto.ColorDto;
+import com.esecondhand.esecondhand.domain.dto.NewCategoryDto;
 import com.esecondhand.esecondhand.domain.entity.Category;
+import com.esecondhand.esecondhand.domain.entity.Gender;
 import com.esecondhand.esecondhand.domain.mapper.BrandMapper;
 import com.esecondhand.esecondhand.domain.mapper.CategoryMapper;
 import com.esecondhand.esecondhand.domain.mapper.ColorMapper;
@@ -32,6 +34,22 @@ public class CategoryServiceImpl implements CategoryService {
 
         return categoryMapper.mapToCategoryDtoList(categories);
 
+    }
+
+    @Override
+    public void saveCategory(NewCategoryDto newCategoryDto) {
+        Category category = new Category();
+        Category parentCategory = categoryRepository.findById(newCategoryDto.getParentId()).orElse(null);
+        if(parentCategory != null){
+            category.setParentId(parentCategory);
+            if(!parentCategory.getGender().toString().equals("UNDEFINED")){
+                category.setGender(parentCategory.getGender());
+            } else {
+                category.setGender(Gender.valueOf(newCategoryDto.getCategoryGender()));
+            }
+            category.setName(newCategoryDto.getCategoryName());
+            categoryRepository.save(category);
+        }
     }
 
 }

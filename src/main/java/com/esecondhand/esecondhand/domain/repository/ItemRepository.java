@@ -22,7 +22,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
 
     Optional<List<Item>> findAllByUserIdInAndIsActiveIsTrueAndIsHiddenFalseOrderByCreationDateDesc(List<Long> userIds, Pageable pageable);
 
-    Long countByUserIdAndIsHiddenIsFalse(Long userId);
+    Long countByUserIdAndIsHiddenIsFalseAndIsActiveIsTrue(Long userId);
 
     Long countByUserIdAndIsHiddenIsTrue(Long userId);
 

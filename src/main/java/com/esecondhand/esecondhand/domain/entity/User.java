@@ -24,6 +24,7 @@ public class User {
     private String email;
     private String displayName;
     private String phoneNumber;
+    private String role;
     private String city;
     private String zipCode;
     private LocalDateTime creationDate;

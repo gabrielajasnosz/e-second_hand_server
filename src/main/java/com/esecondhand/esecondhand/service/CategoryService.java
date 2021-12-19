@@ -1,14 +1,12 @@
 package com.esecondhand.esecondhand.service;
 
-import com.esecondhand.esecondhand.domain.dto.BrandDto;
-import com.esecondhand.esecondhand.domain.dto.CategoryDto;
-import com.esecondhand.esecondhand.domain.dto.ColorDto;
-import com.esecondhand.esecondhand.domain.dto.SizeDto;
+import com.esecondhand.esecondhand.domain.dto.*;
 
 import java.util.List;
 import java.util.Map;
 
 public interface CategoryService {
     List<CategoryDto> getCategories();
+    void saveCategory(NewCategoryDto newCategoryDto);
 
 }
