@@ -4,6 +4,8 @@ import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.*;
 import com.esecondhand.esecondhand.domain.mapper.ItemMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
+import com.esecondhand.esecondhand.exception.InvalidImagesNumberException;
+import com.esecondhand.esecondhand.exception.InvalidItemPropertiesException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
@@ -31,9 +33,6 @@ import java.util.*;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     private ItemRepository itemRepository;
 
     private BrandRepository brandRepository;
@@ -54,14 +53,8 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemMapper itemMapper;
 
-    private final Long DEFAULT_PAGE_SIZE = 20L;
 
-    private final String DEFAULT_SORTING_ORDER = "DESC";
-
-    private final String DEFAULT_SORTING_COLUMN = "creationDate";
-
-
-    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, FollowerRepository followerRepository, ItemMapper itemMapper1) {
+    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, FollowerRepository followerRepository) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.brandRepository = brandRepository;
@@ -72,11 +65,14 @@ public class ItemServiceImpl implements ItemService {
         this.commentRepository = commentRepository;
         this.itemPictureRepository = itemPictureRepository;
         this.followerRepository = followerRepository;
-        this.itemMapper = itemMapper1;
     }
 
 
-    public ItemDto saveItem(ItemEntryDto itemEntryDto) throws IOException {
+    public ItemDto saveItem(ItemEntryDto itemEntryDto) throws IOException, InvalidImagesNumberException, InvalidItemPropertiesException {
+        if(itemEntryDto.getImages() == null || itemEntryDto.getImages().length < 1 || itemEntryDto.getImages().length > 6){
+            throw new InvalidImagesNumberException("Images number should be between 1-6");
+        }
+
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
 
@@ -86,13 +82,23 @@ public class ItemServiceImpl implements ItemService {
         }
 
         Item item = itemMapper.mapToItem(itemEntryDto);
-        item.setCategory(categoryRepository.findById(itemEntryDto.getCategoryId()).orElse(null));
-        item.setColor(colorRepository.findById(itemEntryDto.getColorId()).orElse(null));
-        item.setSize(sizeRepository.findById(itemEntryDto.getSizeId()).orElse(null));
-        item.setUser(userRepository.findById(appUser.getUser().getId()).orElse(null));
+
+        Category category = categoryRepository.findById(itemEntryDto.getCategoryId()).orElse(null);
+        Color color = colorRepository.findById(itemEntryDto.getColorId()).orElse(null);
+        Size size = sizeRepository.findById(itemEntryDto.getSizeId()).orElse(null);
+
+        if(category == null || color == null || size == null){
+            throw new InvalidItemPropertiesException("New item properties are invalid");
+        }
+
+        item.setCategory(category);
+        item.setColor(color);
+        item.setSize(size);
+        item.setUser(appUser.getUser());
         item.setIsActive(true);
         item.setIsHidden(false);
         item.setBrand(brand);
+        item.setId(5L);
 
         Item itemSaved = itemRepository.save(item);
         saveUploadedFile(itemEntryDto.getMainImage(), itemSaved, true);

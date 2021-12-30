@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 public class ItemMapper {
 
-    private ItemPictureMapper itemPictureMapper;
+    private final ItemPictureMapper itemPictureMapper;
 
     public ItemMapper(ItemPictureMapper itemPictureMapper) {
         this.itemPictureMapper = itemPictureMapper;

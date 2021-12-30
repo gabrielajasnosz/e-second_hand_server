@@ -65,8 +65,6 @@ public class CommentServiceImpl implements CommentService {
 
         List<Comment> commentsList = commentRepository.findAllByReceiverId(userId, pageRequest);
 
-        List<CommentDto> comments = commentMapper.mapToCommentDtoList(commentsList);
-
-        return comments;
+        return commentMapper.mapToCommentDtoList(commentsList);
     }
 }

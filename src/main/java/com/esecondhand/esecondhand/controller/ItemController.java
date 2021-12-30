@@ -3,6 +3,8 @@ package com.esecondhand.esecondhand.controller;
 import com.esecondhand.esecondhand.domain.dto.*;
 import com.esecondhand.esecondhand.domain.entity.Item;
 import com.esecondhand.esecondhand.domain.repository.ItemRepository;
+import com.esecondhand.esecondhand.exception.InvalidImagesNumberException;
+import com.esecondhand.esecondhand.exception.InvalidItemPropertiesException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import com.esecondhand.esecondhand.service.ItemService;
@@ -54,8 +56,14 @@ public class ItemController {
             @ApiResponse(code = 404, message = "Not found")
     })
     @RequestMapping(method = RequestMethod.POST, consumes = {"multipart/form-data"})
-    public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.saveItem(itemEntryDto));
+    public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException, InvalidImagesNumberException {
+        try{
+            ItemDto itemDto = itemService.saveItem(itemEntryDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(itemDto);
+        } catch(InvalidImagesNumberException | InvalidItemPropertiesException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
 
     }
 

@@ -1,6 +1,8 @@
 package com.esecondhand.esecondhand.service;
 
 import com.esecondhand.esecondhand.domain.dto.*;
+import com.esecondhand.esecondhand.exception.InvalidImagesNumberException;
+import com.esecondhand.esecondhand.exception.InvalidItemPropertiesException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntBelongToUserException;
 import com.esecondhand.esecondhand.exception.ObjectDoesntExistsException;
 import org.springframework.core.io.FileSystemResource;
@@ -11,7 +13,7 @@ import java.util.List;
 
 public interface ItemService {
 
-    ItemDto saveItem(ItemEntryDto itemEntryDto) throws IOException;
+    ItemDto saveItem(ItemEntryDto itemEntryDto) throws IOException, InvalidImagesNumberException, InvalidItemPropertiesException;
 
     FileSystemResource find(Long imageId);
 
