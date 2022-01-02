@@ -56,7 +56,7 @@ public class ItemController {
             @ApiResponse(code = 404, message = "Not found")
     })
     @RequestMapping(method = RequestMethod.POST, consumes = {"multipart/form-data"})
-    public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException, InvalidImagesNumberException {
+    public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
         try{
             ItemDto itemDto = itemService.saveItem(itemEntryDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(itemDto);
