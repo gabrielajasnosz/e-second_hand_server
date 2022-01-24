@@ -18,13 +18,13 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
 
     Optional<List<Item>> findAllByUserId(Long userId);
 
-    Optional<List<Item>> findAllByUserIdAndIsHiddenIsTrue(Long userId);
+    Optional<List<Item>> findAllByUserIdAndIsHiddenIsTrueAndIsActiveIsTrue(Long userId);
 
     Optional<List<Item>> findAllByUserIdInAndIsActiveIsTrueAndIsHiddenFalseOrderByCreationDateDesc(List<Long> userIds, Pageable pageable);
 
     Long countByUserIdAndIsHiddenIsFalseAndIsActiveIsTrue(Long userId);
 
-    Long countByUserIdAndIsHiddenIsTrue(Long userId);
+    Long countByUserIdAndIsHiddenIsTrueAndIsActiveIsTrue(Long userId);
 
 
     @Query(value = "SELECT max(i.price) FROM Item i")

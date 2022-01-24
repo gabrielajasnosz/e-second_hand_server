@@ -1,9 +1,6 @@
 package com.esecondhand.esecondhand.domain.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -11,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ImageDto {
     private Long id;
     private MultipartFile file;

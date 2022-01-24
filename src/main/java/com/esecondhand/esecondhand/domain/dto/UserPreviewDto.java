@@ -1,13 +1,11 @@
 package com.esecondhand.esecondhand.domain.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@Builder
 @NoArgsConstructor
 public class UserPreviewDto {
     private Long id;

@@ -2,10 +2,7 @@ package com.esecondhand.esecondhand.domain.dto;
 
 import com.esecondhand.esecondhand.domain.entity.Chat;
 import com.esecondhand.esecondhand.domain.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MessageDto {
     private Long authorId;
 

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -43,10 +44,10 @@ public class SavedFilterController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteFilter(@RequestParam("id") Long id){
+    @DeleteMapping("/{filterId}")
+    public ResponseEntity<?> deleteFilter(@PathVariable Long filterId){
         try {
-            savedFilterService.deleteFilter(id);
+            savedFilterService.deleteFilter(filterId);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
@@ -60,7 +61,7 @@ public class SavedFilterController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
     })
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<SavedFilterPreviewDto>> getFiltersList() {
         return ResponseEntity.status(HttpStatus.OK).body(savedFilterService.getSavedFilters());
     }
@@ -71,10 +72,10 @@ public class SavedFilterController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<SavedFilterDto> getFilter(@RequestParam("id") Long id) {
+    @GetMapping("/{filterId}")
+    public ResponseEntity<SavedFilterDto> getFilter(@PathVariable Long filterId) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(savedFilterService.getSavedFilter(id));
+            return ResponseEntity.status(HttpStatus.OK).body(savedFilterService.getSavedFilter(filterId));
         } catch (ObjectDoesntExistsException e) {
             return ResponseEntity.notFound().build();
         } catch (ObjectDoesntBelongToUserException e) {

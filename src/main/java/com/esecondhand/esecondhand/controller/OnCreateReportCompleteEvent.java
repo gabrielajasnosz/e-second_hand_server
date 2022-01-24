@@ -2,7 +2,6 @@ package com.esecondhand.esecondhand.controller;
 
 
 import com.esecondhand.esecondhand.domain.entity.Item;
-import com.esecondhand.esecondhand.domain.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.ApplicationEvent;
@@ -11,7 +10,7 @@ import java.util.Locale;
 
 @Getter
 @Setter
-public class OnCreateReportCompleteEvent  extends ApplicationEvent {
+public class OnCreateReportCompleteEvent extends ApplicationEvent {
     private String appUrl;
     private String cause;
     private Locale locale;

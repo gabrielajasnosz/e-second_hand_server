@@ -21,15 +21,15 @@ public class FollowerMapper {
     }
 
     public UserPreviewDto mapToFollower(Follower entity) {
-        UserPreviewDto dto = new UserPreviewDto();
-        dto.setId(entity.getFollower().getId());
-        dto.setDisplayName(entity.getFollower().getDisplayName());
-        return dto;
+        return UserPreviewDto.builder()
+                .id(entity.getFollower().getId())
+                .displayName(entity.getFollower().getDisplayName())
+                .build();
     }
     public UserPreviewDto mapToFollowedUsers(Follower entity) {
-        UserPreviewDto dto = new UserPreviewDto();
-        dto.setId(entity.getFollowing().getId());
-        dto.setDisplayName(entity.getFollowing().getDisplayName());
-        return dto;
+        return UserPreviewDto.builder()
+                .id(entity.getFollowing().getId())
+                .displayName(entity.getFollowing().getDisplayName())
+                .build();
     }
 }

@@ -18,5 +18,4 @@ public interface ItemPictureRepository extends JpaRepository<ItemPicture, Long> 
     ItemPicture findMainImageUrlByItemId(long itemId);
 
 
-
 }

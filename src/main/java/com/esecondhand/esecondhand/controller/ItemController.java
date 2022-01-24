@@ -57,14 +57,12 @@ public class ItemController {
     })
     @RequestMapping(method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public ResponseEntity<ItemDto> addItem(@Valid @ModelAttribute ItemEntryDto itemEntryDto) throws IOException {
-        try{
+        try {
             ItemDto itemDto = itemService.saveItem(itemEntryDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(itemDto);
-        } catch(InvalidImagesNumberException | InvalidItemPropertiesException e){
+        } catch (InvalidImagesNumberException | InvalidItemPropertiesException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-
     }
 
     @GetMapping(value = "/image/{imageId}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -77,8 +75,8 @@ public class ItemController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<ItemDto> getItem(@RequestParam("id") Long itemId) {
+    @RequestMapping(value = "/{itemId}", method = RequestMethod.GET)
+    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
         try {
             ItemDto itemDto = itemService.getItem(itemId);
             return ResponseEntity.ok(itemDto);
@@ -106,8 +104,8 @@ public class ItemController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(value = "/counters", method = RequestMethod.GET)
-    public ResponseEntity<?> getUserItemsCounters(@RequestParam("user") Long userId) {
+    @RequestMapping(value = "/counters/{userId}", method = RequestMethod.GET)
+    public ResponseEntity<?> getUserItemsCounters(@PathVariable Long userId) {
         try {
             CountersDto counters = itemService.getUserItemsCounters(userId);
             return ResponseEntity.status(HttpStatus.OK).body(counters);
@@ -117,6 +115,7 @@ public class ItemController {
 
 
     }
+
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -155,8 +154,8 @@ public class ItemController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteItem(@RequestParam("id") Long itemId) {
+    @RequestMapping(value = "/{itemId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteItem(@PathVariable Long itemId) {
         try {
             itemService.deleteItem(itemId);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -213,8 +212,8 @@ public class ItemController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(value = "/item-visibility", method = RequestMethod.PUT)
-    public ResponseEntity<?> changeItemVisibility(@RequestParam("id") Long itemId, @RequestParam("status") boolean status) {
+    @RequestMapping(value = "/item-visibility/{itemId}", method = RequestMethod.PUT)
+    public ResponseEntity<?> changeItemVisibility(@PathVariable Long itemId, @RequestParam("status") boolean status) {
         try {
             itemService.manageItemVisibility(itemId, status);
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -245,15 +244,15 @@ public class ItemController {
     })
     @RequestMapping(value = "/report", method = RequestMethod.POST)
     public ResponseEntity<?> reportItem(@RequestBody ReportDto reportDto, HttpServletRequest request) {
-            String appUrl = request.getContextPath();
-            Item item = itemRepository.findById(reportDto.getItemId()).orElse(null);
-            String cause = reportDto.getCause();
-            if(item != null){
-                applicationEventPublisher.publishEvent(new OnCreateReportCompleteEvent(item, cause,
-                        request.getLocale(), appUrl));
-            }
-            itemService.reportItem(reportDto);
-            return ResponseEntity.status(HttpStatus.OK).build();
+        String appUrl = request.getContextPath();
+        Item item = itemRepository.findById(reportDto.getItemId()).orElse(null);
+        String cause = reportDto.getCause();
+        if (item != null) {
+            applicationEventPublisher.publishEvent(new OnCreateReportCompleteEvent(item, cause,
+                    request.getLocale(), appUrl));
+        }
+        itemService.reportItem(reportDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

@@ -14,13 +14,14 @@ public class CommentMapper {
     }
 
     public CommentDto mapToCommentDto(Comment entity) {
-        CommentDto dto = new CommentDto();
-        dto.setId(entity.getId());
-        dto.setComment(entity.getComment());
-        dto.setCreatorId(entity.getCreator().getId());
-        dto.setCreatorName(entity.getCreator().getDisplayName());
-        dto.setRating(entity.getRating());
-        dto.setCreationDate(entity.getCreationDate());
-        return dto;
+
+        return CommentDto.builder()
+                .id(entity.getId())
+                .comment(entity.getComment())
+                .creatorId(entity.getCreator().getId())
+                .creatorName(entity.getCreator().getDisplayName())
+                .rating(entity.getRating())
+                .creationDate(entity.getCreationDate())
+                .build();
     }
 }

@@ -28,8 +28,8 @@ public class FollowerController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not Found"),
     })
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> addToFollowers(@RequestParam("user") Long userId){
+    @PostMapping("/{userId}")
+    public ResponseEntity<?> addToFollowers(@PathVariable Long userId){
         try {
             followerService.addToFollowed(userId);
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -43,8 +43,8 @@ public class FollowerController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
     })
-    @RequestMapping(method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteFromFollowed(@RequestParam("user") Long userId) {
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteFromFollowed(@PathVariable Long userId) {
         followerService.deleteFromFollowed(userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -55,8 +55,8 @@ public class FollowerController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<?> getFollowers(@RequestParam("user") Long userId){
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getFollowers(@PathVariable Long userId){
         try {
             List<UserPreviewDto> followers = followerService.getFollowers(userId);
             return ResponseEntity.status(HttpStatus.OK).body(followers);
@@ -71,8 +71,8 @@ public class FollowerController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Not found")
     })
-    @RequestMapping(value = "/following", method = RequestMethod.GET)
-    public ResponseEntity<?> getFollowing(@RequestParam("user") Long userId){
+    @GetMapping("/following/{userId}")
+    public ResponseEntity<?> getFollowing(@PathVariable Long userId){
         try {
             List<UserPreviewDto> followers = followerService.getFollowing(userId);
             return ResponseEntity.status(HttpStatus.OK).body(followers);

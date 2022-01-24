@@ -11,7 +11,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
     @PersistenceContext
@@ -44,8 +43,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
         final TypedQuery<Item> finalQuery = entityManager.createQuery(query);
         finalQuery.setMaxResults(itemListFiltersDto.getPageSize() + 1);
-        List<Item> result = finalQuery.getResultList();
-        return result;
+        return finalQuery.getResultList();
     }
 
     private Predicate createWhereClause(Root<Item> root, Join<Item, Category> category, Join<Item, Brand> brand, Join<Item, Color> color, Join<Item, Size> size, Join<Item, User> user, CriteriaBuilder builder, ItemListFiltersDto itemListFiltersDto, List<Long> categoryIds, List<Long> followedIds) throws ParseException {
@@ -55,11 +53,11 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
             predicates.add(category.get("id").in(categoryIds));
         }
 
-        if(itemListFiltersDto.getUserId() != null){
+        if (itemListFiltersDto.getUserId() != null) {
             predicates.add(builder.equal(user.get("id"), itemListFiltersDto.getUserId()));
         }
 
-        if(itemListFiltersDto.isOnlyFollowedUsers()){
+        if (itemListFiltersDto.isOnlyFollowedUsers()) {
             predicates.add(user.get("id").in(followedIds));
         }
 
@@ -110,7 +108,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         predicates.add(builder.equal(root.get("isActive"), true));
 
         Predicate[] predicatesArray = new Predicate[predicates.size()];
-        return builder.and(predicates.toArray(predicatesArray));
+        Predicate predicate = builder.and(predicates.toArray(predicatesArray));
+        return predicate;
     }
 }
 

@@ -2,7 +2,6 @@ package com.esecondhand.esecondhand;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,6 +9,8 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
+
+import java.time.Clock;
 
 @SpringBootApplication
 public class ESecondHandApplication {
@@ -19,8 +20,7 @@ public class ESecondHandApplication {
     }
 
     @Bean
-    public ITemplateResolver templateResolver()
-    {
+    public ITemplateResolver templateResolver() {
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix("templates/");
         templateResolver.setSuffix(".html");
@@ -30,8 +30,7 @@ public class ESecondHandApplication {
     }
 
     @Bean
-    public TemplateEngine templateEngine()
-    {
+    public TemplateEngine templateEngine() {
         TemplateEngine templateEngine = new TemplateEngine();
         templateEngine.setTemplateResolver(this.templateResolver());
 
@@ -47,5 +46,10 @@ public class ESecondHandApplication {
                         .allowedOrigins("http://localhost:3000");
             }
         };
+    }
+
+    @Bean
+    public Clock systemUtcClock() { // <--Note the method name will change the bean ID
+        return Clock.systemUTC();
     }
 }

@@ -1,7 +1,7 @@
 package com.esecondhand.esecondhand.domain.mapper;
 
-import com.esecondhand.esecondhand.domain.entity.Category;
 import com.esecondhand.esecondhand.domain.dto.CategoryDto;
+import com.esecondhand.esecondhand.domain.entity.Category;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,14 +13,15 @@ public class CategoryMapper {
     public List<CategoryDto> mapToCategoryDtoList(List<Category> entity) {
         return entity.stream().map(this::mapToCategoryDto).collect(Collectors.toList());
     }
-    public CategoryDto mapToCategoryDto(Category category){
-        CategoryDto dto = new CategoryDto();
-        dto.setId(category.getId());
-        dto.setGender(category.getGender());
-        dto.setName(category.getName());
-        dto.setSubCategories(mapToCategoryDtoList(category.getSubCategories()));
-        dto.setParentId(category.getParentId() == null ? null : category.getParentId().getId());
 
-        return dto;
+    public CategoryDto mapToCategoryDto(Category category) {
+
+        return CategoryDto.builder()
+                .id(category.getId())
+                .gender(category.getGender())
+                .name(category.getName())
+                .subCategories(mapToCategoryDtoList(category.getSubCategories()))
+                .parentId(category.getParentId() == null ? null : category.getParentId().getId())
+                .build();
     }
 }

@@ -19,15 +19,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -53,8 +55,9 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemMapper itemMapper;
 
+    private Clock clock;
 
-    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, FollowerRepository followerRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, BrandRepository brandRepository, ColorRepository colorRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, UserRepository userRepository, CommentRepository commentRepository, ItemPictureRepository itemPictureRepository, FollowerRepository followerRepository, Clock clock) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.brandRepository = brandRepository;
@@ -65,11 +68,15 @@ public class ItemServiceImpl implements ItemService {
         this.commentRepository = commentRepository;
         this.itemPictureRepository = itemPictureRepository;
         this.followerRepository = followerRepository;
+        this.clock = clock;
     }
 
 
     public ItemDto saveItem(ItemEntryDto itemEntryDto) throws IOException, InvalidImagesNumberException, InvalidItemPropertiesException {
-        if(itemEntryDto.getImages() == null || itemEntryDto.getImages().length < 1 || itemEntryDto.getImages().length > 6){
+        if ((itemEntryDto.getMainImage() == null
+                && (itemEntryDto.getImages() == null
+                || itemEntryDto.getImages().length == 0))
+                || (itemEntryDto.getImages() != null && itemEntryDto.getImages().length > 5)) {
             throw new InvalidImagesNumberException("Images number should be between 1-6");
         }
 
@@ -87,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
         Color color = colorRepository.findById(itemEntryDto.getColorId()).orElse(null);
         Size size = sizeRepository.findById(itemEntryDto.getSizeId()).orElse(null);
 
-        if(category == null || color == null || size == null){
+        if (category == null || color == null || size == null) {
             throw new InvalidItemPropertiesException("New item properties are invalid");
         }
 
@@ -98,7 +105,6 @@ public class ItemServiceImpl implements ItemService {
         item.setIsActive(true);
         item.setIsHidden(false);
         item.setBrand(brand);
-        item.setId(5L);
 
         Item itemSaved = itemRepository.save(item);
         saveUploadedFile(itemEntryDto.getMainImage(), itemSaved, true);
@@ -115,14 +121,11 @@ public class ItemServiceImpl implements ItemService {
         String MAIN_DIR = "src/main/resources/images/";
         String SUB_DIR = item.getUser().getId().toString() + "/item-images/" + item.getId().toString() + "/";
 
-        String FILE_LOCATION = SUB_DIR + item.getId().toString() + "-" + new Date().getTime() + "." + FilenameUtils.getExtension(file.getOriginalFilename());
+        String FILE_LOCATION = SUB_DIR + item.getId().toString() + "-" + LocalDateTime.now(clock).getNano() + "." + FilenameUtils.getExtension(file.getOriginalFilename());
         Path newFile = Paths.get(MAIN_DIR + FILE_LOCATION);
         Files.createDirectories(newFile.getParent());
-
         Files.write(newFile, file.getBytes());
         itemPictureRepository.save(new ItemPicture(null, item, LocalDateTime.now(), FILE_LOCATION, isMainPicture));
-
-
     }
 
     @Override
@@ -191,7 +194,7 @@ public class ItemServiceImpl implements ItemService {
             appUser = (AppUser) user;
         }
         List<Long> followersIds = new ArrayList<>();
-        if(appUser != null && itemListFiltersDto.isOnlyFollowedUsers()){
+        if (appUser != null && itemListFiltersDto.isOnlyFollowedUsers()) {
             followersIds = followerRepository.getUserFollowedUsersIds(appUser.getUserId());
         }
 
@@ -252,7 +255,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemPreviewDto> getHiddenItems() {
         AppUser appUser = (AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Item> itemList = itemRepository.findAllByUserIdAndIsHiddenIsTrue(appUser.getUser().getId()).orElse(new ArrayList<>());
+        List<Item> itemList = itemRepository.findAllByUserIdAndIsHiddenIsTrueAndIsActiveIsTrue(appUser.getUser().getId()).orElse(new ArrayList<>());
 
         Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
 
@@ -276,7 +279,7 @@ public class ItemServiceImpl implements ItemService {
         }
         CountersDto counters = new CountersDto();
         if (appUser != null && appUser.getUser().getId().equals(userId)) {
-            counters.setHiddenItemsCounter(itemRepository.countByUserIdAndIsHiddenIsTrue(userId));
+            counters.setHiddenItemsCounter(itemRepository.countByUserIdAndIsHiddenIsTrueAndIsActiveIsTrue(userId));
         }
         counters.setItemsCounter(itemRepository.countByUserIdAndIsHiddenIsFalseAndIsActiveIsTrue(userId));
 
@@ -307,7 +310,7 @@ public class ItemServiceImpl implements ItemService {
         List<ItemPreviewDto> followedUsersItems = new ArrayList<>();
         Map<Long, Long> mainPictureIdByItemId = new HashMap<>();
 
-        if(items != null){
+        if (items != null) {
             for (Item item : items) {
                 mainPictureIdByItemId.put(item.getId(), itemPictureRepository.findMainImageIdByItemId(item.getId()));
             }
@@ -321,7 +324,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void reportItem(ReportDto reportDto) {
         Item item = itemRepository.findById(reportDto.getItemId()).orElse(null);
-        if( item != null ){
+        if (item != null) {
             item.setIsActive(false);
             itemRepository.save(item);
         }

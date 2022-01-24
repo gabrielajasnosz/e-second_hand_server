@@ -8,13 +8,17 @@ import com.esecondhand.esecondhand.domain.mapper.ItemPictureMapper;
 import com.esecondhand.esecondhand.domain.repository.*;
 import com.esecondhand.esecondhand.exception.InvalidImagesNumberException;
 import com.esecondhand.esecondhand.exception.InvalidItemPropertiesException;
-import org.junit.jupiter.api.BeforeAll;
+import com.esecondhand.esecondhand.service.ItemService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -22,67 +26,119 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.ZoneId;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ItemServiceImplTest {
 
 
-    @InjectMocks
-    private ItemServiceImpl itemService;
+    @Autowired
+    private ItemService itemService;
 
-    @Mock
+    @Autowired
     private ItemRepository itemRepository;
 
-    @Mock
-    private BrandRepository brandRepository;
-
-    @Mock
-    private ItemMapper itemMapper;
-
-    @Mock
-    private ItemPictureMapper itemPictureMapper;
-
-    @Mock
-    private ItemPictureRepository itemPictureRepository;
-
-    @Mock
-    private ColorRepository colorRepository;
-
-    @Mock
-    private SizeRepository sizeRepository;
-
-    @Mock
-    private CategoryRepository categoryRepository;
-
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
-    @Mock
+    @MockBean
+    private MailSender mailSender;
+
+    @MockBean
+    private JavaMailSender javaMailSender;
+
+    @Autowired
+    private BrandRepository brandRepository;
+
+    @Autowired
+    private ItemMapper itemMapper;
+
+    @MockBean
+    private ItemPictureRepository itemPictureRepository;
+
+    @Autowired
+    private ColorRepository colorRepository;
+
+    @Autowired
+    private SizeRepository sizeRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @MockBean
     private CommentRepository commentRepository;
 
-    @Mock
+    @MockBean
     private FollowerRepository followerRepository;
 
+    @MockBean
+    private Clock clock;
+    private Clock fixedClock;
+
+    private final static LocalDate LOCAL_DATE = LocalDate.of(1989, 01, 13);
 
 
-    @BeforeAll
+    User user;
+    Item item;
+    Brand brand;
+    Color color;
+    Size size;
+    Category category;
+
+
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        //itemPictureMapper = mock(ItemPictureMapper.class);
+        user = userRepository.save(createAppUser());
+        item = createItem();
+
+        brand = brandRepository.save(createCorrectBrand());
+        color = colorRepository.save(createCorrectColor());
+        category = categoryRepository.save(createCorrectCategory());
+        size = sizeRepository.save(createCorrectSize());
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+
+        when((AppUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal()).thenReturn(new AppUser(user));
+
+        fixedClock = Clock.fixed(LOCAL_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+        doReturn(fixedClock.instant()).when(clock).instant();
+        doReturn(fixedClock.getZone()).when(clock).getZone();
+
     }
+
+    @Test
+    public void shouldSaveItemWhenCorrectEntryValues() throws IOException, InvalidItemPropertiesException, InvalidImagesNumberException {
+
+        ItemEntryDto itemEntryDto = createCorrectEntryDto(brand, color, category, size);
+
+        ItemDto itemDto = itemService.saveItem(itemEntryDto);
+
+        assertEquals(itemDto.getUserId(), user.getId());
+        assertEquals(itemDto.getBrand(), brand.getName());
+        assertEquals(itemDto.getIsHidden(), false);
+        assertEquals(itemDto.getIsActive(), true);
+        assertEquals(itemDto.getSizeId(), size.getId());
+        assertEquals(itemDto.getName(), itemEntryDto.getName());
+        assertEquals(itemDto.getCategoryId(), category.getId());
+
+    }
+
 
     @Test
     public void shouldThrowException_WhenIncorrectImagesNumber() {
@@ -97,35 +153,10 @@ class ItemServiceImplTest {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
-    @Test
-    public void shouldSaveItem() throws IOException, InvalidImagesNumberException, InvalidItemPropertiesException {
-        ItemEntryDto itemEntryDto = createCorrectEntryDto();
-        when((AppUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal()).thenReturn(createAppUser());
-        when(brandRepository.save(any(Brand.class))).thenReturn(new Brand(8L, "Test brand"));
-        when(itemMapper.mapToItem(itemEntryDto)).thenCallRealMethod();
-        when(categoryRepository.findById(itemEntryDto.getCategoryId())).thenReturn(Optional.of(createCorrectCategory()));
-        when(sizeRepository.findById(itemEntryDto.getSizeId())).thenReturn(Optional.of(createCorrectSize()));
-        when(colorRepository.findById(itemEntryDto.getColorId())).thenReturn(Optional.of(createCorrectColor()));
-        when(itemRepository.save(any(Item.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
-        when(itemMapper.mapToItemDto(any(Item.class))).thenCallRealMethod();
-
-        ItemDto itemDto = itemService.saveItem(itemEntryDto);
-        System.out.println(itemDto);
-
-
-        assertTrue(true);
-    }
-
     //
     @Test
-    public void shouldThrowException_WhenCategoryDontExists() throws IOException, InvalidImagesNumberException, InvalidItemPropertiesException {
+    public void shouldThrowException_WhenCategoryDontExists() {
         ItemEntryDto itemEntryDto = createCorrectEntryDto();
-        when((AppUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal()).thenReturn(createAppUser());
-        when(brandRepository.save(any(Brand.class))).thenReturn(new Brand(8L, "Test brand"));
-        when(itemMapper.mapToItem(itemEntryDto)).thenCallRealMethod();
-        when(categoryRepository.findById(itemEntryDto.getCategoryId())).thenReturn(Optional.ofNullable(null));
 
         Exception exception = assertThrows(InvalidItemPropertiesException.class, () -> {
             itemService.saveItem(itemEntryDto);
@@ -136,6 +167,23 @@ class ItemServiceImplTest {
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
+
+    @Test
+    public void whenUploadedFileSavedThenCheckFileExistenceAndPath() throws IOException, InvalidItemPropertiesException, InvalidImagesNumberException {
+
+        ItemEntryDto itemEntryDto = createEntryDtoWithOneImage(brand, color, category, size );
+
+        ItemDto itemDto = itemService.saveItem(itemEntryDto);
+
+        String MAIN_DIR = "src/main/resources/images/";
+        String SUB_DIR = itemDto.getUserId() + "/item-images/" + itemDto.getId() + "/";
+        String FILE_NAME = itemDto.getId() + "-" + LocalDateTime.now(clock).getNano() + "." + "txt";
+
+
+        Path path = Paths.get(MAIN_DIR + SUB_DIR + FILE_NAME);
+        assertTrue(Files.exists(path));
+    }
+
 
     private ItemEntryDto createCorrectEntryDto() {
         MockMultipartFile firstFile = new MockMultipartFile("firstImage", new byte[1]);
@@ -155,27 +203,67 @@ class ItemServiceImplTest {
         itemEntryDto.setPrice(90.0);
         return itemEntryDto;
     }
+
+    private ItemEntryDto createEntryDtoWithOneImage(Brand brand, Color color, Category category, Size size) {
+        MockMultipartFile firstFile = new MockMultipartFile("data", "filename.txt", "text/plain", "some xml".getBytes());
+        ItemEntryDto itemEntryDto = new ItemEntryDto();
+        itemEntryDto.setBrand("brand");
+        itemEntryDto.setColorId(color.getId());
+        itemEntryDto.setSex("WOMAN");
+        itemEntryDto.setCategoryId(category.getId());
+        itemEntryDto.setName("Test name");
+        itemEntryDto.setDescription("Test description");
+        itemEntryDto.setMainImage(firstFile);
+        itemEntryDto.setSizeId(size.getId());
+        itemEntryDto.setPrice(90.0);
+        return itemEntryDto;
+    }
+
+    private ItemEntryDto createCorrectEntryDto(Brand brand, Color color, Category category, Size size) {
+        MockMultipartFile firstFile = new MockMultipartFile("firstImage", new byte[1]);
+        MockMultipartFile secondFile = new MockMultipartFile("secondImage", new byte[1]);
+        MockMultipartFile mainImage = new MockMultipartFile("mainImage", new byte[1]);
+        MultipartFile[] files = {firstFile, secondFile};
+        ItemEntryDto itemEntryDto = new ItemEntryDto();
+        itemEntryDto.setBrand("brand");
+        itemEntryDto.setColorId(color.getId());
+        itemEntryDto.setImages(files);
+        itemEntryDto.setSex("WOMAN");
+        itemEntryDto.setCategoryId(category.getId());
+        itemEntryDto.setName("Test name");
+        itemEntryDto.setDescription("Test description");
+        itemEntryDto.setMainImage(mainImage);
+        itemEntryDto.setSizeId(size.getId());
+        itemEntryDto.setPrice(90.0);
+        return itemEntryDto;
+    }
+
     private Category createCorrectCategory() {
         Category category = new Category();
-        category.setId(2L);
         category.setName("Test category");
         return category;
     }
+
     private Size createCorrectSize() {
         Size size = new Size();
-        size.setId(3L);
         size.setProductType(1L);
         size.setName("Test category");
         return size;
     }
+
+    private Brand createCorrectBrand() {
+        Brand brand = new Brand();
+        brand.setName("brand");
+        return brand;
+    }
+
     private Color createCorrectColor() {
         Color color = new Color();
-        color.setId(4L);
         color.setName("Test color");
         return color;
     }
 
-    private AppUser createAppUser() {
+    private User createAppUser() {
         User user = new User();
         user.setRole("USER");
         user.setPassword("test");
@@ -185,9 +273,22 @@ class ItemServiceImplTest {
         user.setCreationDate(LocalDateTime.now());
         user.setDisplayName("test testowy");
         user.setEmail("test@test.com");
-        user.setId(90L);
-        return new AppUser(user);
+        return user;
 
     }
+
+
+    private Item createItem() {
+        Item item = new Item();
+        item.setId(150L);
+        item.setName("name");
+        item.setDescription("desc");
+        item.setCreationDate(LocalDateTime.now());
+        item.setPrice(5.0D);
+        item.setGender(Gender.valueOf("MAN"));
+        item.setUser(user);
+        return item;
+    }
+
 
 }

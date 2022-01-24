@@ -1,10 +1,7 @@
 package com.esecondhand.esecondhand.domain.dto;
 
 import com.esecondhand.esecondhand.service.serviceImpl.ValidEmail;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -15,6 +12,7 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RegisterDto {
 
 

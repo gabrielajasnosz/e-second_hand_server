@@ -22,5 +22,4 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     Long findUnreadCounter(List<Long> chatId, Long userId);
 
 
-
 }

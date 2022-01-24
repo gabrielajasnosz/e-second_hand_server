@@ -23,8 +23,6 @@ import java.util.List;
 @RequestMapping("/chat")
 public class MessageController {
 
-
-    Logger logger = LoggerFactory.getLogger(MessageController.class);
     private MessageService messageService;
 
     public MessageController(MessageService messageService) {

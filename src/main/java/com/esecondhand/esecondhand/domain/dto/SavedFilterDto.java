@@ -1,16 +1,14 @@
 package com.esecondhand.esecondhand.domain.dto;
 
 import com.esecondhand.esecondhand.domain.entity.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class SavedFilterDto {
     private Long id;
     private CategoryDto categoryDto;

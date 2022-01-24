@@ -46,8 +46,8 @@ public class CommentController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
     })
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<CommentDto>> getComments(@RequestParam("user") Long userId, @RequestParam("page") int page){
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<CommentDto>> getComments(@PathVariable Long userId, @RequestParam("page") int page){
             return ResponseEntity.status(HttpStatus.OK).body(commentService.getComments(userId, page));
     }
 }
