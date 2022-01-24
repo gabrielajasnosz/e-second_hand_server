@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Activation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link th:href="@{styles.css}" href="styles.css" rel="stylesheet" type="text/css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<body>
+<div style="width: 100% !important; display: flex !important; align-items: center; flex-direction: column;">
+
+    <img style="width: 90px !important; height: 90px !important;" src="https://cdn-icons-png.flaticon.com/512/25/25770.png" alt="" />
+    <span style=" display: flex; flex-direction: row; text-transform: capitalize; align-items: center; font-family: Open Sans, sans-serif; font-size: 20px;">
+        Dear <p style="margin-left: 5px" th:text="${username}"> </p>
+    </span>
+    <p style="font-family: Open Sans, sans-serif; font-size: 16px;">
+        Your account has been created, please click the link below to activate it:
+    </p>
+    <p style="font-family: Open Sans, sans-serif; font-size: 16px; color: #6b705c; font-weight: bold; font-style: normal; cursor: pointer;">
+        <a style="color: #6b705c" th:href="${link}">Activation Link</a>
+    </p>
+    <div style="display: flex; flex-direction: row; align-items: center;">
+    <span style="font-family: Open Sans, sans-serif; font-size: 16px;">Regards, </span>
+        <span style=" margin-left: 10px; font-size: 16px; font-family: Open Sans, sans-serif; font-style: italic; font-weight: bold;">e-second-hand</span>
+    </div>
+</div>
+</body>
+</html>
