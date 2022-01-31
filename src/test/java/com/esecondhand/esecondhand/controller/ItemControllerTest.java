@@ -113,7 +113,7 @@ class ItemControllerTest {
     }
 
     @Test
-    public void assertThatFileDownloadWorks() throws Exception {
+    public void shouldReturnImage() throws Exception {
         FileSystemResource image = new FileSystemResource("src/test/resources/images/test-1234.png");
         when(itemService.find(Mockito.anyLong())).thenReturn(image);
         mockMvc.perform(get("/items/image/1"))

@@ -74,19 +74,21 @@ class MessageServiceTest {
 
     @Test
     public void shouldCreateNewChatWhenDoesntExist() {
+        //given
         User loggedUser = userRepository.save(createAppUser("logged", "logged@mail.com"));
         User secondUser = userRepository.save(createAppUser("second", "second@mail.com"));
-
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
         when((AppUser) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal()).thenReturn(new AppUser(loggedUser));
-
         MessageEntryDto messageEntryDto = new MessageEntryDto(null, secondUser.getId(), "test message");
+
+        //when
         messageService.saveMessage(messageEntryDto);
 
+        //then
         Chat chat = chatRepository.findChat(loggedUser.getId(), secondUser.getId());
         assertNotNull(chat);
         assertNotNull(chatParticipantRepository.findChatParticipant(loggedUser.getId(), chat.getId()));

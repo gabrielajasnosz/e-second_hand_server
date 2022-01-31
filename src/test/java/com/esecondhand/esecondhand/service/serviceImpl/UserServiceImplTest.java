@@ -96,21 +96,19 @@ class UserServiceImplTest {
 
     @Test
     public void shouldThrowExceptionWhenEmailAlreadyExists() throws EmailAlreadyExistsException {
+        //given
         when(userMapper.mapRegisterUserDtoToUser(any())).thenCallRealMethod();
-
         RegisterDto registerDto = createRegisterDto("newEmail@email.com", "second user");
         userService.save(registerDto);
-
         RegisterDto secondDto = createRegisterDto("newEmail@email.com", "new user");
+        String expectedMessage = "Provided email already exists!";
+
+        //when
         Exception exception = assertThrows(EmailAlreadyExistsException.class, () -> {
             userService.save(secondDto);
         });
-
-        String expectedMessage = "Provided email already exists!";
-        String actualMessage = exception.getMessage();
-
-        assertTrue(actualMessage.contains(expectedMessage));
-
+        //then
+        assertTrue(exception.getMessage().contains(expectedMessage));
     }
 
     private RegisterDto createRegisterDto(String email, String displayName) {

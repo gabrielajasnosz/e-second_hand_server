@@ -80,17 +80,18 @@ public class ItemServiceImplUnitTest {
 
     @Test
     public void shouldThrowException_WhenCategoryDontExists() {
+        //given
         ItemEntryDto itemEntryDto = createCorrectEntryDto();
-
         when(categoryRepository.findById(anyLong())).thenReturn(Optional.empty());
+        String expectedMessage = "New item properties are invalid";
+
+        //when
         Exception exception = assertThrows(InvalidItemPropertiesException.class, () -> {
             itemService.saveItem(itemEntryDto);
         });
 
-        String expectedMessage = "New item properties are invalid";
-        String actualMessage = exception.getMessage();
-
-        assertTrue(actualMessage.contains(expectedMessage));
+        //then
+        assertTrue(exception.getMessage().contains(expectedMessage));
     }
 
 
